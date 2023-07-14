@@ -12,8 +12,12 @@ _main:
   return asm.slice(1);
 };
 
-const compile = (source) => {
-  return parse(lex(source));
-};
-
-export default { compile };
+document.body.addEventListener("click", (event) => {
+  if (event.target.id === "compile") {
+    const source = document.getElementById("source").value;
+    const tokens = lex(source);
+    document.getElementById("lexed").value = JSON.stringify(tokens, null, 2);
+    const ast = parse(tokens);
+    document.getElementById("parsed").value = JSON.stringify(ast, null, 2);
+  }
+});
