@@ -1,0 +1,12 @@
+{
+  "name": "webcc",
+  "version": "0.0.1",
+  "description": "A RESTful C compiler",
+  "main": "index.js",
+  "author": "Kyle Coffey <me@phytolizer.dev>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "prettier-eslint": "^15.0.1"
+  }
+}
