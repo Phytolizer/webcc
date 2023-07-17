@@ -12,3 +12,10 @@ document.body.addEventListener("click", (event) => {
     document.getElementById("assembly").value = generateProgram(ast);
   }
 });
+
+document.getElementById("source").onkeydown = (event) => {
+  if (event.key === "Enter" && event.ctrlKey) {
+    document.getElementById("compile").click();
+    event.preventDefault();
+  }
+};
