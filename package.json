@@ -8,5 +8,8 @@
   "private": false,
   "devDependencies": {
     "prettier-eslint": "^15.0.1"
+  },
+  "dependencies": {
+    "fastify": "^4.19.2"
   }
 }
