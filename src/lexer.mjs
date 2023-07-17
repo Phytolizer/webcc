@@ -6,7 +6,7 @@ const patterns = {
   space: /^\s+/,
 };
 
-const syms = ["(", ")", "{", "}", ";"];
+const syms = ["(", ")", "{", "}", ";", "-", "~", "!"];
 
 const nextToken = (source) => {
   for (const [key, pattern] of Object.entries(patterns)) {

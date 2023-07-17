@@ -2,14 +2,19 @@
   "name": "webcc",
   "version": "0.0.1",
   "description": "A RESTful C compiler",
-  "main": "index.js",
+  "main": "src/index.mjs",
   "author": "Kyle Coffey <me@phytolizer.dev>",
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "http-server": "^14.1.1",
     "prettier-eslint": "^15.0.1"
   },
   "dependencies": {
     "fastify": "^4.19.2"
+  },
+  "scripts": {
+    "serve": "node src/server.mjs",
+    "web": "http-server src"
   }
 }

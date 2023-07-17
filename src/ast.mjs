@@ -10,6 +10,10 @@ export const returnStatement = (expression) => {
   return { type: "returnStatement", expression };
 };
 
+export const unaryOp = (operator, operand) => {
+  return { type: "unaryOp", operator, operand };
+};
+
 export const constant = (value) => {
   return { type: "constant", value };
 };

@@ -22,12 +22,20 @@ const matchToken = (tokens, type) => {
 };
 
 const parseExpression = (tokens) => {
-  const token = checkToken(tokens, "constant");
-  if (token && token.type === "constant") {
-    tokens.shift();
+  if (
+    checkToken(tokens, "-") ||
+    checkToken(tokens, "~") ||
+    checkToken(tokens, "!")
+  ) {
+    const operator = tokens.shift().value;
+    const operand = parseExpression(tokens);
+    return ast.unaryOp(operator, operand);
+  } else if (checkToken(tokens, "constant")) {
+    const token = tokens.shift();
     return ast.constant(token.value);
+  } else {
+    throw new Error(`Unexpected token type ${token.type}`);
   }
-  throw new Error(`Unexpected token type ${token.type}`);
 };
 
 const parseStatement = (tokens) => {
