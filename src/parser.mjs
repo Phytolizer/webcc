@@ -53,6 +53,7 @@ const parseFunction = (tokens) => {
   matchToken(tokens, "{");
   const body = parseStatement(tokens);
   matchToken(tokens, "}");
+  matchToken(tokens, "eof");
   return ast.functionDeclaration(name, body);
 };
 
