@@ -1,15 +1,16 @@
-import * as ast from "./ast.mjs";
+import * as ast from "./ast";
+import { Token } from "./lexer";
 
-const peek = (tokens) => {
+const peek = (tokens: Array<Token>) => {
   let token = tokens[0];
-  while (token && token.type === "space") {
+  while (token !== undefined && token.type === "space") {
     tokens.shift();
     token = tokens[0];
   }
   return token;
 };
 
-const checkToken = (tokens, type) => {
+const checkToken = (tokens: Array<Token>, type: string) => {
   const token = peek(tokens);
   if (token === undefined || token.type !== type) {
     return undefined;
@@ -17,7 +18,7 @@ const checkToken = (tokens, type) => {
   return token;
 };
 
-const matchToken = (tokens, type) => {
+const matchToken = (tokens: Array<Token>, type: string) => {
   const token = checkToken(tokens, type);
   if (token === undefined) {
     throw new Error(`Expected token type ${type}, but got ${token}`);
@@ -26,7 +27,7 @@ const matchToken = (tokens, type) => {
   return token;
 };
 
-const binaryPrecedence = (operator) => {
+const binaryPrecedence = (operator: string) => {
   switch (operator) {
     case "*":
     case "/": {
@@ -42,7 +43,7 @@ const binaryPrecedence = (operator) => {
   }
 };
 
-const unaryPrecedence = (operator) => {
+const unaryPrecedence = (operator: string) => {
   switch (operator) {
     case "-":
     case "!":
@@ -53,7 +54,7 @@ const unaryPrecedence = (operator) => {
   }
 };
 
-const parsePrimary = (tokens) => {
+const parsePrimary = (tokens: Array<Token>): ast.Expression => {
   switch (peek(tokens).type) {
     case "(": {
       tokens.shift();
@@ -63,18 +64,21 @@ const parsePrimary = (tokens) => {
     }
     default: {
       const constant = matchToken(tokens, "constant").value;
-      return ast.constant(constant);
+      return new ast.Constant(constant);
     }
   }
 };
 
-const parseExpression = (tokens, parentPrecedence = 0) => {
+const parseExpression = (
+  tokens: Array<Token>,
+  parentPrecedence = 0
+): ast.Expression => {
   const unaryPrec = unaryPrecedence(peek(tokens).type);
   let left;
   if (unaryPrec !== 0 && unaryPrec >= parentPrecedence) {
-    const operator = tokens.shift();
+    const operator = tokens.shift()!;
     const operand = parseExpression(tokens, unaryPrec);
-    left = ast.unaryOp(operator, operand);
+    left = new ast.UnaryOp(operator.type, operand);
   } else {
     left = parsePrimary(tokens);
   }
@@ -85,22 +89,22 @@ const parseExpression = (tokens, parentPrecedence = 0) => {
       break;
     }
 
-    const operator = tokens.shift();
+    const operator = tokens.shift()!;
     const right = parseExpression(tokens, precedence);
-    left = ast.binaryOp(left, operator, right);
+    left = new ast.BinaryOp(left, operator.type, right);
   }
 
   return left;
 };
 
-const parseStatement = (tokens) => {
+const parseStatement = (tokens: Array<Token>): ast.Statement => {
   matchToken(tokens, "return");
   const expression = parseExpression(tokens);
   matchToken(tokens, ";");
-  return ast.returnStatement(expression);
+  return new ast.ReturnStatement(expression);
 };
 
-const parseFunction = (tokens) => {
+const parseFunction = (tokens: Array<Token>): ast.FunctionDeclaration => {
   matchToken(tokens, "int");
   const name = matchToken(tokens, "ident").value;
   matchToken(tokens, "(");
@@ -109,9 +113,9 @@ const parseFunction = (tokens) => {
   const body = parseStatement(tokens);
   matchToken(tokens, "}");
   matchToken(tokens, "eof");
-  return ast.functionDeclaration(name, body);
+  return new ast.FunctionDeclaration(name, body);
 };
 
-export const parse = (tokens) => {
-  return ast.program(parseFunction(tokens));
+export const parse = (tokens: Array<Token>): ast.Program => {
+  return new ast.Program(parseFunction(tokens));
 };

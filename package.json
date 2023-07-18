@@ -7,14 +7,21 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "@types/node": "^20.4.2",
     "http-server": "^14.1.1",
-    "prettier-eslint": "^15.0.1"
+    "prettier": "^3.0.0",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "fastify": "^4.19.2"
   },
   "scripts": {
-    "serve": "node src/server.mjs",
-    "web": "http-server src"
+    "build": "webpack --mode=development",
+    "dist": "webpack --mode=production",
+    "serve": "node dist/server.mjs",
+    "web": "http-server"
   }
 }

@@ -1,6 +1,7 @@
-import { stripNewlines } from "./stringutil.mjs";
+import { stripNewlines } from "./stringutil";
+import * as ast from "./ast";
 
-const generateLogicalNot = (operand) => {
+const generateLogicalNot = (operand: ast.Expression): string => {
   return stripNewlines(`
 ${generateExpression(operand)}
     cmp rax, 0
@@ -9,21 +10,21 @@ ${generateExpression(operand)}
 `);
 };
 
-const generateBitwiseNot = (operand) => {
+const generateBitwiseNot = (operand: ast.Expression): string => {
   return stripNewlines(`
 ${generateExpression(operand)}
     not rax
 `);
 };
 
-const generateMinus = (operand) => {
+const generateMinus = (operand: ast.Expression): string => {
   return stripNewlines(`
 ${generateExpression(operand)}
     neg rax
 `);
 };
 
-const generateUnary = (operator, operand) => {
+const generateUnary = (operator: string, operand: ast.Expression): string => {
   switch (operator) {
     case "!": {
       return generateLogicalNot(operand);
@@ -40,12 +41,16 @@ const generateUnary = (operator, operand) => {
   }
 };
 
-const generateBinary = (left, operator, right) => {
+const generateBinary = (
+  left: ast.Expression,
+  operator: string,
+  right: ast.Expression
+): string => {
   const arithmeticOps = {
-    "+": (e1, e2) => `add ${e1}, ${e2}`,
-    "-": (e1, e2) => `sub ${e1}, ${e2}`,
-    "*": (e1, e2) => `imul ${e1}, ${e2}`,
-    "/": (e1, e2) =>
+    "+": (e1: string, e2: string) => `add ${e1}, ${e2}`,
+    "-": (e1: string, e2: string) => `sub ${e1}, ${e2}`,
+    "*": (e1: string, e2: string) => `imul ${e1}, ${e2}`,
+    "/": (e1: string, e2: string) =>
       stripNewlines(`
     mov rdx, 0
     mov rax, ${e1}
@@ -53,7 +58,7 @@ const generateBinary = (left, operator, right) => {
     idiv ${e2}
 `),
   };
-  switch (operator.type) {
+  switch (operator) {
     case "+":
     case "-":
     case "*":
@@ -63,28 +68,30 @@ ${generateExpression(left)}
     push rax
 ${generateExpression(right)}
     pop rcx
-    ${arithmeticOps[operator.type]("rcx", "rax")}
+    ${arithmeticOps[operator]("rcx", "rax")}
 `);
+    }
+    default: {
+      throw new Error(`Unexpected binary operator ${operator}`);
     }
   }
 };
 
-const generateExpression = (expression) => {
+const generateExpression = (expression: ast.Expression): string => {
   switch (expression.type) {
     case "constant": {
+      const c = expression as ast.Constant;
       return stripNewlines(`
-    mov rax, ${expression.value}
+    mov rax, ${c.value}
 `);
     }
     case "unaryOp": {
-      return generateUnary(expression.operator, expression.operand);
+      const u = expression as ast.UnaryOp;
+      return generateUnary(u.operator, u.operand);
     }
     case "binaryOp": {
-      return generateBinary(
-        expression.left,
-        expression.operator,
-        expression.right
-      );
+      const b = expression as ast.BinaryOp;
+      return generateBinary(b.left, b.operator, b.right);
     }
     default: {
       throw new Error(`Unexpected expression type ${expression.type}`);
@@ -92,11 +99,12 @@ const generateExpression = (expression) => {
   }
 };
 
-const generateStatement = (statement) => {
+const generateStatement = (statement: ast.Statement): string => {
   switch (statement.type) {
     case "returnStatement": {
+      const rs = statement as ast.ReturnStatement;
       return stripNewlines(`
-${generateExpression(statement.expression)}
+${generateExpression(rs.expression)}
     ret
 `);
     }
@@ -106,7 +114,7 @@ ${generateExpression(statement.expression)}
   }
 };
 
-const generateFunction = (functionDeclaration) => {
+const generateFunction = (functionDeclaration: ast.FunctionDeclaration): string => {
   return stripNewlines(`
     global ${functionDeclaration.name}
 ${functionDeclaration.name}:
@@ -114,6 +122,6 @@ ${generateStatement(functionDeclaration.body)}
 `);
 };
 
-export const generateProgram = (program) => {
+export const generateProgram = (program: ast.Program): string => {
   return generateFunction(program.functionDeclaration) + "\n";
 };

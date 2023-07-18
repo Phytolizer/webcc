@@ -6,9 +6,18 @@ const patterns = {
   space: /^\s+/,
 };
 
-const syms = ["(", ")", "{", "}", ";", "-", "~", "!", "+", "*", "/"];
+export const syms = ["(", ")", "{", "}", ";", "-", "~", "!", "+", "*", "/"];
 
-const nextToken = (source) => {
+export interface Token {
+  type: string;
+  value: string;
+}
+
+interface TokenWithRest extends Token {
+  rest: string;
+}
+
+const nextToken = (source: string): TokenWithRest => {
   for (const [key, pattern] of Object.entries(patterns)) {
     const match = source.match(pattern);
     if (match) {
@@ -22,9 +31,10 @@ const nextToken = (source) => {
       return { type: sym, value: sym, rest: source.slice(sym.length) };
     }
   }
+  return { type: "error", value: source[0], rest: source.slice(1) };
 };
 
-export const lex = (source) => {
+export const lex = (source: string): Array<Token> => {
   const tokens = [];
   while (source.length > 0) {
     const { type, value, rest } = nextToken(source);

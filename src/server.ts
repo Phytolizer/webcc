@@ -1,7 +1,8 @@
-import { generateProgram } from "./backend.mjs";
-import { lex } from "./lexer.mjs";
-import { parse } from "./parser.mjs";
+import { generateProgram } from "./backend";
+import { Token, lex } from "./lexer";
+import { parse } from "./parser";
 import Fastify from "fastify";
+import * as ast from "./ast";
 
 const fastify = Fastify({ logger: true });
 
@@ -63,22 +64,51 @@ const schema = {
   },
 };
 
+interface RequestBody {
+  type: string;
+}
+
+interface LexRequest extends RequestBody {
+  type: "lex";
+  source: string;
+}
+
+interface ParseRequest extends RequestBody {
+  type: "parse";
+  source: string;
+}
+
+interface CompileRequest extends RequestBody {
+  type: "compile";
+  source?: string;
+  tokens?: Array<Token>;
+  ast?: ast.Program;
+}
+
 fastify.post("/", { schema: { body: schema } }, async (request, reply) => {
-  const { type } = request.body;
-  if (type === "lex") {
-    const { source } = request.body;
-    reply.send(lex(source));
-  } else if (type === "parse") {
-    const { source } = request.body;
-    reply.send(parse(source));
-  } else if (type === "compile") {
-    const { source, tokens, ast } = request.body;
-    if (source) {
-      reply.send({ asm: generateProgram(parse(lex(source))) });
-    } else if (tokens) {
-      reply.send({ asm: generateProgram(parse(tokens)) });
-    } else if (ast) {
-      reply.send({ asm: generateProgram(ast) });
+  const body = request.body as RequestBody;
+  const { type } = body;
+  switch (type) {
+    case "lex": {
+      const { source } = body as LexRequest;
+      reply.send(lex(source));
+      break;
+    }
+    case "parse": {
+      const { source } = body as ParseRequest;
+      reply.send(parse(lex(source)));
+      break;
+    }
+    case "compile": {
+      const { source, tokens, ast } = body as CompileRequest;
+      if (source) {
+        reply.send({ asm: generateProgram(parse(lex(source))) });
+      } else if (tokens) {
+        reply.send({ asm: generateProgram(parse(tokens)) });
+      } else if (ast) {
+        reply.send({ asm: generateProgram(ast) });
+      }
+      break;
     }
   }
 });
