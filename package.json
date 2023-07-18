@@ -20,6 +20,7 @@
     "fastify": "^4.19.2"
   },
   "scripts": {
+    "format": "prettier-standard --format",
     "dist": "webpack --mode=production",
     "serve": "webpack --mode=development && node dist/server.mjs",
     "web": "webpack --mode=development && http-server",
