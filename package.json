@@ -7,10 +7,11 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "@ksmithut/prettier-standard": "^0.1.7",
     "@types/node": "^20.4.2",
     "http-server": "^14.1.1",
-    "prettier": "^3.0.0",
     "ts-loader": "^9.4.4",
+    "ts-standard": "^12.0.2",
     "typescript": "^5.1.6",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
@@ -22,6 +23,7 @@
     "build": "webpack --mode=development",
     "dist": "webpack --mode=production",
     "serve": "node dist/server.mjs",
-    "web": "http-server"
+    "web": "http-server",
+    "lint": "ts-standard"
   }
 }
