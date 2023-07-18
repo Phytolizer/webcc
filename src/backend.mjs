@@ -40,6 +40,35 @@ const generateUnary = (operator, operand) => {
   }
 };
 
+const generateBinary = (left, operator, right) => {
+  const arithmeticOps = {
+    "+": (e1, e2) => `add ${e1}, ${e2}`,
+    "-": (e1, e2) => `sub ${e1}, ${e2}`,
+    "*": (e1, e2) => `imul ${e1}, ${e2}`,
+    "/": (e1, e2) =>
+      stripNewlines(`
+    mov rdx, 0
+    mov rax, ${e1}
+    cqo
+    idiv ${e2}
+`),
+  };
+  switch (operator.type) {
+    case "+":
+    case "-":
+    case "*":
+    case "/": {
+      return stripNewlines(`
+${generateExpression(left)}
+    push rax
+${generateExpression(right)}
+    pop rcx
+    ${arithmeticOps[operator.type]("rcx", "rax")}
+`);
+    }
+  }
+};
+
 const generateExpression = (expression) => {
   switch (expression.type) {
     case "constant": {
@@ -49,6 +78,13 @@ const generateExpression = (expression) => {
     }
     case "unaryOp": {
       return generateUnary(expression.operator, expression.operand);
+    }
+    case "binaryOp": {
+      return generateBinary(
+        expression.left,
+        expression.operator,
+        expression.right
+      );
     }
     default: {
       throw new Error(`Unexpected expression type ${expression.type}`);

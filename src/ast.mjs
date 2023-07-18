@@ -10,6 +10,10 @@ export const returnStatement = (expression) => {
   return { type: "returnStatement", expression };
 };
 
+export const binaryOp = (left, operator, right) => {
+  return { type: "binaryOp", left, operator, right };
+};
+
 export const unaryOp = (operator, operand) => {
   return { type: "unaryOp", operator, operand };
 };
