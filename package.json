@@ -20,10 +20,9 @@
     "fastify": "^4.19.2"
   },
   "scripts": {
-    "build": "webpack --mode=development",
     "dist": "webpack --mode=production",
-    "serve": "node dist/server.mjs",
-    "web": "http-server",
+    "serve": "webpack --mode=development && node dist/server.mjs",
+    "web": "webpack --mode=development && http-server",
     "lint": "ts-standard"
   }
 }
