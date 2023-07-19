@@ -1,5 +1,6 @@
 import { Program } from './ast'
 import { generateProgram, Backend, backends } from './backend'
+import { BackendNotImplementedError } from './backend/errors'
 import { lex } from './lexer'
 import { parse } from './parser'
 
@@ -33,7 +34,11 @@ const updateAssemblyOutput = (ast: Program) => {
   try {
     elements.assembly.value = generateProgram(ast, getBackend())
   } catch (err) {
-    elements.assembly.value = (err as Error).message
+    if (err instanceof BackendNotImplementedError) {
+      elements.assembly.value = err.message
+    } else {
+      throw err
+    }
   }
 }
 

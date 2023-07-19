@@ -1,9 +1,10 @@
 import { Backend, generateProgram } from './backend'
 import { Token, lex } from './lexer'
 import { parse } from './parser'
-import Fastify, { errorCodes } from 'fastify'
+import Fastify from 'fastify'
 import * as ast from './ast'
 import { backends } from './backend'
+import { BackendNotImplementedError } from './backend/errors'
 
 const server = Fastify({
   logger: {
@@ -123,7 +124,7 @@ server.post('/', { schema: { body: schema } }, async (request, reply) => {
           await reply.send({ asm: generateProgram(ast, backend) })
         }
       } catch (err) {
-        if (err instanceof Error) {
+        if (err instanceof BackendNotImplementedError) {
           await reply.code(501).send({ error: err.message })
         }
       }
