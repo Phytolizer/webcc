@@ -8,16 +8,50 @@
 
   <body>
     <div id="content">
-      <h1>Enter code below.</h1>
+      <h1>Web C Compiler — Browser Local</h1>
       <textarea id="source" name="source">int main() { return 0; }</textarea>
       <br />
       <button id="compile">Compile</button>
-      <h2>Lexer Output</h2>
-      <pre><output id="lexed" for="source"></output></pre>
-      <h2>Parser Output</h2>
-      <pre><output id="parsed" for="source"></output></pre>
-      <h2>Assembly</h2>
-      <pre><output id="assembly" for="source"></output></pre>
+      <button type="button" class="collapsible" target="lexed-section">
+        Toggle Lexer Output
+      </button>
+      <div id="lexed-section" class="collapsible-content">
+        <pre><output id="lexed" for="source"></output></pre>
+      </div>
+      <button type="button" class="collapsible" target="parsed-section">
+        Toggle Parser Output
+      </button>
+      <div id="parsed-section" class="collapsible-content">
+        <pre><output id="parsed" for="source"></output></pre>
+      </div>
+      <div id="backend-selection">
+        <h3>Select Backend:</h3>
+        <input
+          type="radio"
+          id="backend-nasm"
+          name="backend"
+          value="nasm"
+          checked
+        />
+        <label for="backend-nasm">NASM</label>
+        <input type="radio" id="backend-llvm" name="backend" value="llvm" />
+        <label for="backend-llvm">LLVM</label>
+        <input type="radio" id="backend-c" name="backend" value="c" />
+        <label for="backend-c">C</label>
+        <input type="radio" id="backend-wat" name="backend" value="wat" />
+        <label for="backend-wat">WebAssembly</label>
+      </div>
+      <button
+        type="button"
+        id="assembly-collapsible"
+        class="collapsible"
+        target="assembly-section"
+      >
+        Toggle Backend Output
+      </button>
+      <div id="assembly-section" class="collapsible-content">
+        <pre><output id="assembly" for="source"></output></pre>
+      </div>
     </div>
     <script type="module" src="dist/bundle.js"></script>
   </body>

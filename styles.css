@@ -16,3 +16,25 @@ textarea {
 output {
   font-family: monospace;
 }
+.collapsible {
+  cursor: pointer;
+  margin-top: 1em;
+  padding: 0.5em;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 1.2em;
+  font-weight: bold;
+  background-color: rgb(39, 39, 39);
+  color: white;
+}
+.active, .collapsible:hover {
+  background-color: rgb(50, 50, 50);
+}
+.collapsible-content {
+  padding: 0 1em;
+  display: none;
+  overflow: hidden;
+  background-color: rgb(39, 39, 39);
+}

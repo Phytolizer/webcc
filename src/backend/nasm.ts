@@ -1,5 +1,5 @@
-import { stripNewlines } from './stringutil'
-import * as ast from './ast'
+import { stripNewlines } from '../stringutil'
+import * as ast from '../ast'
 
 const generateLogicalNot = (operand: ast.Expression): string => {
   return stripNewlines(`

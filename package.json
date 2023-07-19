@@ -10,6 +10,7 @@
     "@ksmithut/prettier-standard": "^0.1.7",
     "@types/node": "^20.4.2",
     "http-server": "^14.1.1",
+    "pino-pretty": "^10.0.1",
     "ts-loader": "^9.4.4",
     "ts-standard": "^12.0.2",
     "typescript": "^5.1.6",
@@ -22,7 +23,7 @@
   "scripts": {
     "format": "prettier-standard --format",
     "dist": "webpack --mode=production",
-    "serve": "webpack --mode=development && node dist/server.mjs",
+    "serve": "tsc && node dist/server.js",
     "web": "webpack --mode=development && http-server",
     "lint": "ts-standard"
   }
