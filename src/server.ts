@@ -21,16 +21,14 @@ const schema = {
       type: { enum: ['lex', 'parse', 'compile'] }
     },
     required: ['type'],
-    anyOf: [
+    oneOf: [
       {
         properties: {
           type: { enum: ['lex', 'parse'] },
           source: { type: 'string' }
         },
         required: ['source']
-      }
-    ],
-    oneOf: [
+      },
       {
         properties: {
           type: { const: 'compile' },
