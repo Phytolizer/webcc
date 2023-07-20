@@ -95,6 +95,7 @@ const generateFunction = (
 ): string => {
   return sexp(
     'func',
+    `$${functionDeclaration.name}`,
     sexp('export', `"${functionDeclaration.name}"`),
     sexp('result', 'i32'),
     generateStatement(functionDeclaration.body)
@@ -102,5 +103,14 @@ const generateFunction = (
 }
 
 export const generateProgram = (program: ast.Program): string => {
-  return sexp('module', generateFunction(program.functionDeclaration))
+  return sexp(
+    'module',
+    generateFunction(program.functionDeclaration),
+    sexp(
+      'func',
+      sexp('export', '"_start"'),
+      sexp('result', 'i32'),
+      sexp('call', '$main')
+    )
+  )
 }
