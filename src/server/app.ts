@@ -50,6 +50,8 @@ export const getApp = (opts: any) => {
         } catch (err) {
           if (err instanceof BackendNotImplementedError) {
             await reply.code(501).send({ error: err.message })
+          } else {
+            throw err
           }
         }
         break
