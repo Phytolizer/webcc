@@ -6,7 +6,7 @@ const sexp = (name: string, ...args: string[]): string => {
   return `(${[name, ...args].join(' ')})`
 }
 
-const generateBinary = (binary: ast.BinaryOp): string => {
+const generateBinary = (binary: ast.BinaryOp): string[] => {
   const arithmeticOps = {
     '+': 'i32.add',
     '-': 'i32.sub',
@@ -19,11 +19,11 @@ const generateBinary = (binary: ast.BinaryOp): string => {
     case '-':
     case '*':
     case '/': {
-      return stripNewlines(`
-${generateExpression(binary.left)}
-${generateExpression(binary.right)}
-    ${arithmeticOps[binary.operator]}
-`)
+      return [
+        ...generateExpression(binary.left),
+        ...generateExpression(binary.right),
+        arithmeticOps[binary.operator]
+      ]
     }
     default: {
       throw new NotImplementedError(`binary operator ${binary.operator}`)
@@ -31,22 +31,16 @@ ${generateExpression(binary.right)}
   }
 }
 
-const generateUnaryOp = (operator: string): string => {
+const generateUnaryOp = (operator: string): string[] => {
   switch (operator) {
     case '!': {
-      return stripNewlines(`
-    i32.eqz
-`)
+      return ['i32.eqz']
     }
     case '~': {
-      return stripNewlines(`
-    i32.not
-`)
+      return ['i32.not']
     }
     case '-': {
-      return stripNewlines(`
-    i32.neg
-`)
+      return ['i32.neg']
     }
     default: {
       throw new NotImplementedError(`unary operator ${operator}`)
@@ -54,20 +48,15 @@ const generateUnaryOp = (operator: string): string => {
   }
 }
 
-const generateExpression = (expression: ast.Expression): string => {
+const generateExpression = (expression: ast.Expression): string[] => {
   switch (expression.type) {
     case 'constant': {
       const c = expression as ast.Constant
-      return stripNewlines(`
-    i32.const ${c.value}
-`)
+      return [`i32.const ${c.value}`]
     }
     case 'unaryOp': {
       const u = expression as ast.UnaryOp
-      return stripNewlines(`
-${generateExpression(u.operand)}
-${generateUnaryOp(u.operator)}
-`)
+      return [...generateExpression(u.operand), ...generateUnaryOp(u.operator)]
     }
     case 'binaryOp': {
       const b = expression as ast.BinaryOp
@@ -79,7 +68,7 @@ ${generateUnaryOp(u.operator)}
   }
 }
 
-const generateStatement = (statement: ast.Statement): string => {
+const generateStatement = (statement: ast.Statement): string[] => {
   switch (statement.type) {
     case 'returnStatement': {
       return generateExpression((statement as ast.ReturnStatement).expression)
@@ -98,7 +87,7 @@ const generateFunction = (
     `$${functionDeclaration.name}`,
     sexp('export', `"${functionDeclaration.name}"`),
     sexp('result', 'i32'),
-    generateStatement(functionDeclaration.body)
+    ...generateStatement(functionDeclaration.body)
   )
 }
 
