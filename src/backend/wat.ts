@@ -99,7 +99,7 @@ export const generateProgram = (program: ast.Program): string => {
       'func',
       sexp('export', '"_start"'),
       sexp('result', 'i32'),
-      sexp('call', '$main')
+      ...['call', '$main']
     )
   )
 }
