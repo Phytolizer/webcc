@@ -32,6 +32,10 @@
     "serve": "node src/server/genSchema.js && tsc && node dist/server/index.js",
     "serve-dist": "node dist/server/index.js",
     "web": "webpack --mode=development && http-server",
-    "lint": "ts-standard"
+    "lint": "ts-standard",
+    "test": "jest"
+  },
+  "ts-standard": {
+    "project": "tsconfig.all.json"
   }
 }

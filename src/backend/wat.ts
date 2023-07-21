@@ -1,5 +1,4 @@
 import * as ast from '../ast'
-import { stripNewlines } from '../stringutil'
 import { NotImplementedError } from './errors'
 
 const sexp = (name: string, ...args: string[]): string => {

@@ -1,8 +1,9 @@
 import { InjectOptions } from 'fastify'
-import app from './global'
 import wabt from 'wabt'
+import { stripNewlines } from '../src/stringutil'
+import app from './global'
 
-export const compile = async (source: string) => {
+export const compile = async (source: string): Promise<string> => {
   const req: InjectOptions = {
     url: '/',
     method: 'POST',
@@ -15,7 +16,7 @@ export const compile = async (source: string) => {
   return res.json().asm
 }
 
-export const run = async (asm: string) => {
+export const run = async (asm: string): Promise<number> => {
   const w = await wabt()
   const module = w.parseWat('test.wat', asm)
   module.applyNames()
@@ -24,7 +25,11 @@ export const run = async (asm: string) => {
   return (instance.exports.main as Function)()
 }
 
-export const compileAndRun = async (source: string) => {
+export const compileAndRun = async (source: string): Promise<number> => {
   const asm = await compile(source)
-  return run(asm)
+  return await run(asm)
+}
+
+export const processTest = <T extends { source: string }>(test: T): T => {
+  return { ...test, source: stripNewlines(test.source) }
 }

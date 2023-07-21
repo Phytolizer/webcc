@@ -1,4 +1,4 @@
-import Fastify, { FastifyHttpOptions, FastifyPluginAsync, FastifyServerOptions } from 'fastify'
+import Fastify from 'fastify'
 import { generateProgram } from '../backend'
 import { BackendNotImplementedError } from '../backend/errors'
 import { lex } from '../lexer'
@@ -14,8 +14,7 @@ import {
   isTokensCompileRequest
 } from './types'
 
-export interface AppOptions extends FastifyServerOptions {}
-
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getApp = (opts: any) => {
   const server = Fastify(opts)
 

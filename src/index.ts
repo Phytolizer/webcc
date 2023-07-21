@@ -30,7 +30,7 @@ const getBackend = (): Backend => {
   throw new Error('unreachable')
 }
 
-const updateAssemblyOutput = (ast: Program) => {
+const updateAssemblyOutput = (ast: Program): void => {
   try {
     elements.assembly.value = generateProgram(ast, getBackend())
   } catch (err) {
@@ -83,7 +83,6 @@ for (const radio of [
   )
 ]) {
   radio.addEventListener('change', () => {
-    const backend = radio.value as Backend
     updateAssemblyOutput(parse(lex(elements.source.value)))
   })
 }
