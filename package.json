@@ -29,7 +29,7 @@
     "build-web": "webpack --mode=development && tsc",
     "dist": "webpack --mode=production && tsc",
     "build": "node src/server/genSchema.js && tsc",
-    "serve": "node dist/server/index.js",
+    "serve": "node dist/src/server/index.js",
     "web": "webpack --mode=development && http-server",
     "lint": "ts-standard",
     "test": "vitest --run"

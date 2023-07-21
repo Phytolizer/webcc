@@ -6,40 +6,84 @@ const sexp = (name: string, ...args: string[]): string => {
 }
 
 const generateBinary = (binary: ast.BinaryOp): string[] => {
-  const arithmeticOps = {
-    '+': 'i32.add',
-    '-': 'i32.sub',
-    '*': 'i32.mul',
-    '/': 'i32.div_s'
+  const simpleOps = {
+    '+': sexp('i32.add'),
+    '-': sexp('i32.sub'),
+    '*': sexp('i32.mul'),
+    '/': sexp('i32.div_s'),
+    '%': sexp('i32.rem_s'),
+    '==': sexp('i32.eq'),
+    '!=': sexp('i32.ne'),
+    '<': sexp('i32.lt_s'),
+    '>': sexp('i32.gt_s'),
+    '<=': sexp('i32.le_s'),
+    '>=': sexp('i32.ge_s'),
+    '&': sexp('i32.and'),
+    '|': sexp('i32.or'),
+    '^': sexp('i32.xor'),
+    '<<': sexp('i32.shl'),
+    '>>': sexp('i32.shr_s')
   }
 
-  switch (binary.operator) {
-    case '+':
-    case '-':
-    case '*':
-    case '/': {
+  for (const [op, result] of Object.entries(simpleOps)) {
+    if (binary.operator === op) {
       return [
         ...generateExpression(binary.left),
         ...generateExpression(binary.right),
-        arithmeticOps[binary.operator]
+        result
       ]
     }
-    default: {
-      throw new NotImplementedError(`binary operator ${binary.operator}`)
+  }
+
+  switch (binary.operator) {
+    case '&&': {
+      return [
+        ...generateExpression(binary.left),
+        sexp(
+          'if',
+          sexp('result', 'i32'),
+          sexp(
+            'then',
+            ...generateExpression(binary.right),
+            sexp('i32.eqz'),
+            sexp('i32.eqz')
+          ),
+          sexp('else', sexp('i32.const', '0'))
+        )
+      ]
+    }
+    case '||': {
+      return [
+        ...generateExpression(binary.left),
+        sexp(
+          'if',
+          sexp('result', 'i32'),
+          sexp('i32.eqz'),
+          sexp(
+            'then',
+            ...generateExpression(binary.right),
+            sexp('i32.eqz'),
+            sexp('i32.eqz')
+          ),
+          sexp('else', sexp('i32.const', '1'))
+        )
+      ]
     }
   }
+
+  throw new NotImplementedError(`binary operator ${binary.operator}`)
 }
 
 const generateUnaryOp = (operator: string): string[] => {
   switch (operator) {
     case '!': {
-      return ['i32.const 0', 'i32.eq']
+      return [sexp('i32.eqz')]
     }
     case '~': {
-      return ['i32.const -1', 'i32.xor']
+      return [sexp('i32.const', '-1'), sexp('i32.xor')]
     }
     case '-': {
-      return ['i32.const 0', 'call $swap', 'i32.sub']
+      return [sexp('i32.const', '0'), sexp('call $swap'), sexp('i32.sub')]
     }
     default: {
       throw new NotImplementedError(`unary operator ${operator}`)
@@ -51,7 +95,7 @@ const generateExpression = (expression: ast.Expression): string[] => {
   switch (expression.type) {
     case 'constant': {
       const c = expression as ast.Constant
-      return [`i32.const ${c.value}`]
+      return [sexp('i32.const', c.value)]
     }
     case 'unaryOp': {
       const u = expression as ast.UnaryOp

@@ -10,10 +10,12 @@ export const compile = async (source: string): Promise<string> => {
     body: { type: 'compile', backend: 'wat', source }
   }
   const res = await app.inject(req)
-  expect(res.statusCode).toBe(200)
   expect(res.body).not.toBe('')
-  expect(res.json()).toHaveProperty('asm')
-  return res.json().asm
+  const body = res.json()
+  expect(body.message).toBe(undefined)
+  expect(res.statusCode).toBe(200)
+  expect(body).toHaveProperty('asm')
+  return body.asm
 }
 
 export const run = async (asm: string): Promise<number> => {

@@ -31,11 +31,41 @@ const matchToken = (tokens: Token[], type: string): Token => {
 const binaryPrecedence = (operator: string): number => {
   switch (operator) {
     case '*':
-    case '/': {
-      return 2
+    case '/':
+    case '%': {
+      return 10
     }
     case '+':
     case '-': {
+      return 9
+    }
+    case '<<':
+    case '>>': {
+      return 8
+    }
+    case '==':
+    case '!=': {
+      return 7
+    }
+    case '<':
+    case '>':
+    case '<=':
+    case '>=': {
+      return 6
+    }
+    case '&': {
+      return 5
+    }
+    case '^': {
+      return 4
+    }
+    case '|': {
+      return 3
+    }
+    case '&&': {
+      return 2
+    }
+    case '||': {
       return 1
     }
     default: {
@@ -49,7 +79,7 @@ const unaryPrecedence = (operator: string): number => {
     case '-':
     case '!':
     case '~':
-      return 3
+      return 11
     default:
       return 0
   }
