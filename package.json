@@ -9,6 +9,7 @@
   "devDependencies": {
     "@ksmithut/prettier-standard": "^0.1.7",
     "@types/node": "^20.4.2",
+    "@vitest/ui": "^0.33.0",
     "fastify-plugin": "^4.5.1",
     "http-server": "^14.1.1",
     "ts-loader": "^9.4.4",
