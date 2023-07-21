@@ -9,7 +9,6 @@
   "devDependencies": {
     "@ksmithut/prettier-standard": "^0.1.7",
     "@types/node": "^20.4.2",
-    "@vitest/ui": "^0.33.0",
     "fastify-plugin": "^4.5.1",
     "http-server": "^14.1.1",
     "ts-loader": "^9.4.4",
@@ -27,11 +26,11 @@
   },
   "scripts": {
     "format": "prettier-standard --format",
-    "build-web": "webpack --mode=development && tsc",
+    "build-web": "webpack --mode=production && tsc",
     "dist": "webpack --mode=production && tsc",
     "build": "node src/server/genSchema.js && tsc",
     "serve": "node dist/src/server/index.js",
-    "web": "webpack --mode=development && http-server",
+    "web": "http-server",
     "lint": "ts-standard",
     "test": "vitest --run"
   },

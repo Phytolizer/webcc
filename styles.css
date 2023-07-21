@@ -1,5 +1,15 @@
-body {
-  background-color: black;
+html {
+  height: 100%;
+  background: fixed;
+  background: rgb(0, 0, 0);
+  background: linear-gradient(
+    38deg,
+    rgba(2, 2, 2, 1) 0%,
+    rgba(8, 8, 17, 1) 87%,
+    rgba(0, 14, 27, 1) 100%
+  );
+}
+* {
   color: white;
   font-family: sans-serif;
 }
@@ -10,8 +20,13 @@ textarea {
   width: 80%;
   height: 100%;
   font-family: monospace;
-  font-size: 1em;
+  font-size: 1.2em;
+  border-radius: 5px;
   resize: both;
+  padding: 0.1em;
+}
+textarea:focus {
+  box-shadow: 5px 5px 0 2px #fff;
 }
 output {
   font-family: monospace;
@@ -29,7 +44,8 @@ output {
   background-color: rgb(39, 39, 39);
   color: white;
 }
-.active, .collapsible:hover {
+.active,
+.collapsible:hover {
   background-color: rgb(50, 50, 50);
 }
 .collapsible-content {
