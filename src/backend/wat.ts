@@ -34,13 +34,13 @@ const generateBinary = (binary: ast.BinaryOp): string[] => {
 const generateUnaryOp = (operator: string): string[] => {
   switch (operator) {
     case '!': {
-      return ['i32.eqz']
+      return ['i32.const 0', 'i32.eq']
     }
     case '~': {
-      return ['i32.not']
+      return ['i32.const -1', 'i32.xor']
     }
     case '-': {
-      return ['i32.neg']
+      return ['i32.const 0', 'call $swap', 'i32.sub']
     }
     default: {
       throw new NotImplementedError(`unary operator ${operator}`)
@@ -99,7 +99,16 @@ export const generateProgram = (program: ast.Program): string => {
       'func',
       sexp('export', '"_start"'),
       sexp('result', 'i32'),
-      ...['call', '$main']
+      'call $main'
+    ),
+    sexp(
+      'func',
+      '$swap',
+      sexp('param', '$a', 'i32'),
+      sexp('param', '$b', 'i32'),
+      sexp('result', 'i32', 'i32'),
+      'local.get $b',
+      'local.get $a'
     )
   )
 }
