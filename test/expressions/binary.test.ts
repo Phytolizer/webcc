@@ -1,4 +1,5 @@
 import { compileAndRun } from '../helper'
+import { test, describe, it, expect } from 'vitest'
 
 test.each([
   {

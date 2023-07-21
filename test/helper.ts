@@ -1,7 +1,7 @@
 import { InjectOptions } from 'fastify'
 import wabt from 'wabt'
 import { stripNewlines } from '../src/stringutil'
-import app from './global'
+import { expect } from 'vitest'
 
 export const compile = async (source: string): Promise<string> => {
   const req: InjectOptions = {

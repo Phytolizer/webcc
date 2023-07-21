@@ -1,4 +1,5 @@
 import { compileAndRun, processTest } from '../helper'
+import { test, describe, it, expect } from 'vitest'
 
 test.each([
   { constant: '0', expectedResult: 0 },
