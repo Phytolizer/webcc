@@ -53,7 +53,7 @@ elements.compile.addEventListener('click', event => {
   }
 })
 
-elements.source.onkeydown = event => {
+document.onkeydown = event => {
   if (event.key === 'Enter' && event.ctrlKey) {
     elements.compile.click()
     event.preventDefault()
