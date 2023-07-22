@@ -1,11 +1,7 @@
 import { getApp } from './app'
 
 const server = getApp({
-  logger: {
-    transport: {
-      target: 'pino-pretty'
-    }
-  }
+  logger: true
 })
 
 server.listen({ port: 8080 }, (err, address) => {

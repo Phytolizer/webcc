@@ -31,7 +31,8 @@ export const syms = [
   '<=',
   '>=',
   '<<',
-  '>>'
+  '>>',
+  '='
 ].sort((a, b) => b.length - a.length)
 
 export interface Token {

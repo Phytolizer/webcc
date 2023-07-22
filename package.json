@@ -21,8 +21,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "fastify": "^4.19.2",
-    "pino-pretty": "^10.0.1"
+    "fastify": "^4.19.2"
   },
   "scripts": {
     "format": "prettier-standard --format",
