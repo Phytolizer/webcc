@@ -139,7 +139,10 @@ const parseBinaryExpression = (
 }
 
 const parseExpression = (tokens: Token[]): ast.Expression => {
-  if (checkToken(tokens, 'ident', 0) && checkToken(tokens, '=', 1)) {
+  if (
+    checkToken(tokens, 'ident', 0) !== undefined &&
+    checkToken(tokens, '=', 1) !== undefined
+  ) {
     const name = matchToken(tokens, 'ident').value
     matchToken(tokens, '=')
     const expression = parseExpression(tokens)
@@ -159,8 +162,8 @@ const parseStatement = (tokens: Token[]): ast.Statement => {
     case 'int': {
       matchToken(tokens, 'int')
       const name = matchToken(tokens, 'ident').value
-      let expression = undefined
-      if (checkToken(tokens, '=')) {
+      let expression
+      if (checkToken(tokens, '=') !== undefined) {
         matchToken(tokens, '=')
         expression = parseExpression(tokens)
       }
@@ -181,8 +184,11 @@ const parseFunction = (tokens: Token[]): ast.FunctionDeclaration => {
   matchToken(tokens, '(')
   matchToken(tokens, ')')
   matchToken(tokens, '{')
-  let body = []
-  while (!checkToken(tokens, 'eof') && !checkToken(tokens, '}')) {
+  const body = []
+  while (
+    checkToken(tokens, 'eof') === undefined &&
+    checkToken(tokens, '}') === undefined
+  ) {
     body.push(parseStatement(tokens))
   }
   matchToken(tokens, '}')

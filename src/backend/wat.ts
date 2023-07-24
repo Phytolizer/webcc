@@ -9,7 +9,7 @@ class State {
   memIndex: number = 0
   variables: Map<string, number> = new Map()
 
-  pushVariable (name: string) {
+  pushVariable (name: string): void {
     this.variables.set(name, this.memIndex)
     this.memIndex += 4
   }

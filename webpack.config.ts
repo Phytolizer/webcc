@@ -2,7 +2,7 @@ import * as path from 'path'
 import { Configuration } from 'webpack'
 
 export default (env: any, argv: { mode: string }): Configuration => {
-  let result: Configuration = {
+  const result: Configuration = {
     entry: './src/index.ts',
     module: {
       rules: [
