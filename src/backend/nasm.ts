@@ -1,3 +1,4 @@
+// FIXME: variable support is completely broken
 import { stripNewlines } from '../stringutil'
 import * as ast from '../ast'
 
@@ -5,7 +6,7 @@ class State {
   stackIndex: number = -4
   variables: Map<string, number> = new Map()
 
-  pushVariable (name: string) {
+  pushVariable (name: string): void {
     this.variables.set(name, this.stackIndex)
     this.stackIndex -= 4
   }
