@@ -1,5 +1,5 @@
-import { test, describe, it, expect } from 'vitest'
-import { compileAndRun } from '../helper'
+import { test, expect } from 'vitest'
+import { compileAndRun } from './helper'
 
 test.each([
   {
