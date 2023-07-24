@@ -3,6 +3,7 @@ import * as ast from '../ast'
 
 class State {
   stackIndex: number = -8
+  labelCount: number = 1
   variables: Map<string, number> = new Map()
 
   pushVariable (name: string): void {
@@ -16,6 +17,10 @@ class State {
       throw new Error(`Variable ${name} not found`)
     }
     return index
+  }
+
+  label (prefix: string): string {
+    return `.${prefix}${this.labelCount++}`
   }
 
   generateProlog (): string {
@@ -66,6 +71,14 @@ ${this.generateExpression(operand)}
     operator: string,
     right: ast.Expression
   ): string {
+    const cmp = (operator: string): ((e1: string, e2: string) => string) => {
+      return (e1: string, e2: string) =>
+        stripNewlines(`
+    cmp ${e1}, ${e2}
+    mov rax, 0
+    set${operator} al
+`)
+    }
     const arithmeticOps = {
       '+': (e1: string, e2: string) => `add ${e1}, ${e2}`,
       '-': (e1: string, e2: string) => `sub ${e1}, ${e2}`,
@@ -76,19 +89,78 @@ ${this.generateExpression(operand)}
     mov rax, ${e1}
     cqo
     idiv ${e2}
+`),
+      '%': (e1: string, e2: string) =>
+        stripNewlines(`
+    mov rdx, 0
+    mov rax, ${e1}
+    cqo
+    idiv ${e2}
+    mov rax, rdx
+`),
+      '==': cmp('e'),
+      '!=': cmp('ne'),
+      '<': cmp('l'),
+      '>': cmp('g'),
+      '<=': cmp('le'),
+      '>=': cmp('ge'),
+      '&': (e1: string, e2: string) => `and ${e1}, ${e2}`,
+      '|': (e1: string, e2: string) => `or ${e1}, ${e2}`,
+      '^': (e1: string, e2: string) => `xor ${e1}, ${e2}`,
+      '<<': (e1: string, e2: string) =>
+        stripNewlines(`
+    mov rcx, ${e2}
+    shl ${e1}, cl
+`),
+      '>>': (e1: string, e2: string) =>
+        stripNewlines(`
+    mov rcx, ${e2}
+    sar ${e1}, cl
 `)
     }
-    switch (operator) {
-      case '+':
-      case '-':
-      case '*':
-      case '/': {
+    for (const [op, f] of Object.entries(arithmeticOps)) {
+      if (operator === op) {
         return stripNewlines(`
 ${this.generateExpression(left)}
     push rax
 ${this.generateExpression(right)}
     pop rcx
-    ${arithmeticOps[operator]('rax', 'rcx')}
+${f('rcx', 'rax')}
+`)
+      }
+    }
+
+    switch (operator) {
+      case '&&': {
+        const labelTrue = this.label('true')
+        const labelEnd = this.label('end')
+        return stripNewlines(`
+${this.generateExpression(left)}
+    cmp rax, 0
+    jne ${labelTrue}
+    jmp ${labelEnd}
+${labelTrue}:
+${this.generateExpression(right)}
+    cmp rax, 0
+    mov rax, 0
+    setne al
+${labelEnd}:
+`)
+      }
+      case '||': {
+        const labelFalse = this.label('false')
+        const labelEnd = this.label('end')
+        return stripNewlines(`
+${this.generateExpression(left)}
+    cmp rax, 0
+    je ${labelFalse}
+    jmp ${labelEnd}
+${labelFalse}:
+${this.generateExpression(right)}
+    cmp rax, 0
+    mov rax, 0
+    setne al
+${labelEnd}:
 `)
       }
       default: {
