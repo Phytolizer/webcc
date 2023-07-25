@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { Configuration } from 'webpack'
+import { type Configuration } from 'webpack'
 
 export default (env: any, argv: { mode: string }): Configuration => {
   const result: Configuration = {
@@ -14,7 +14,11 @@ export default (env: any, argv: { mode: string }): Configuration => {
       ]
     },
     resolve: {
-      extensions: ['.ts', '.js']
+      extensions: ['.ts', '.js'],
+      fallback: {
+        path: require.resolve('path-browserify'),
+        fs: false
+      }
     },
     output: {
       filename: 'bundle.js',
