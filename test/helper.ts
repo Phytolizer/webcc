@@ -32,6 +32,13 @@ export async function compileAndRun (source: string): Promise<number> {
   return await run(asm)
 }
 
+export function testHasKey<T extends object, K extends PropertyKey> (
+  obj: T,
+  key: K
+): obj is T & { [key in K]: unknown } {
+  return key in obj
+}
+
 export function processTest<T extends { source: string }> (test: T): T {
   return { ...test, source: stripNewlines(test.source) }
 }

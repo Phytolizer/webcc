@@ -14,6 +14,10 @@ class State {
     this.memIndex += 4
   }
 
+  hasVariable (name: string): boolean {
+    return this.variables.has(name)
+  }
+
   getVariable (name: string): number {
     const index = this.variables.get(name)
     if (index === undefined) {
@@ -151,15 +155,21 @@ class State {
   generateStatement = (statement: ast.Statement): string[] => {
     switch (statement.type) {
       case 'returnStatement': {
-        return this.generateExpression(
-          (statement as ast.ReturnStatement).expression
-        )
+        return [
+          ...this.generateExpression(
+            (statement as ast.ReturnStatement).expression
+          ),
+          sexp('return')
+        ]
       }
       case 'declareStatement': {
         const ds = statement as ast.DeclareStatement
         const expression = this.generateExpression(
           ds.expression ?? new ast.Constant('0')
         )
+        if (this.hasVariable(ds.name)) {
+          throw new Error(`Variable ${ds.name} already declared`)
+        }
         this.pushVariable(ds.name)
         return [
           sexp('i32.const', this.getVariable(ds.name).toString()),

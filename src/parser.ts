@@ -191,11 +191,14 @@ function parseFunction (tokens: Token[]): ast.FunctionDeclaration {
   ) {
     body.push(parseStatement(tokens))
   }
+  // main should always finish with return 0
+  body.push(new ast.ReturnStatement(new ast.Constant('0')))
   matchToken(tokens, '}')
   matchToken(tokens, 'eof')
   return new ast.FunctionDeclaration(name, body)
 }
 
 export function parse (tokens: Token[]): ast.Program {
-  return new ast.Program(parseFunction(tokens.filter(t => t.type !== 'space')))
+  const significantTokens = tokens.filter(t => t.type !== 'space')
+  return new ast.Program(parseFunction(significantTokens))
 }
