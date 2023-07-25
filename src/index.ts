@@ -18,7 +18,8 @@ const elements = {
     'assembly-collapsible'
   ) as HTMLButtonElement,
   watPretty: document.getElementById('wat-pretty') as HTMLDivElement,
-  watPrettyBox: document.getElementById('wat-pretty-box') as HTMLInputElement
+  watPrettyBox: document.getElementById('wat-pretty-box') as HTMLInputElement,
+  executeButton: document.getElementById('execute') as HTMLButtonElement
 }
 
 const getBackend = (): Backend => {
@@ -33,13 +34,43 @@ const getBackend = (): Backend => {
   throw new Error('unreachable')
 }
 
+const executeDisabled = "Requires 'WebAssembly' backend."
+
+window.addEventListener('load', () => {
+  elements.executeButton.title = executeDisabled
+})
+
 const updateBackend = (): void => {
   if (getBackend() === 'wat') {
     elements.watPretty.style.display = 'inline'
+    elements.executeButton.disabled = false
+    elements.executeButton.title = ''
   } else {
     elements.watPretty.style.display = 'none'
+    elements.executeButton.disabled = true
+    elements.executeButton.title = executeDisabled
   }
 }
+
+const execute = async (): Promise<void> => {
+  if (getBackend() !== 'wat') {
+    // invariant: 'execute' is only clickable when backend === 'wat'
+    throw new Error('unreachable')
+  }
+  const source = elements.source.value
+  const asm = generateProgram(parse(lex(source)), 'wat')
+  const w = await wabt()
+  const mod = w.parseWat('output.wat', asm)
+  mod.applyNames()
+  const { buffer } = mod.toBinary({})
+  const { instance } = await WebAssembly.instantiate(buffer)
+  const result = (instance.exports.main as Function)() as number
+  alert(`Return value: ${result}`)
+}
+
+elements.executeButton.addEventListener('click', () => {
+  void execute()
+})
 
 const updateAssemblyOutput = async (ast: Program): Promise<void> => {
   try {
@@ -76,7 +107,10 @@ elements.compile.addEventListener('click', event => {
 })
 
 document.onkeydown = event => {
-  if (event.key === 'Enter' && event.ctrlKey) {
+  if (event.key === 'Enter' && event.ctrlKey && event.shiftKey) {
+    elements.executeButton.click()
+    event.preventDefault()
+  } else if (event.key === 'Enter' && event.ctrlKey) {
     elements.compile.click()
     event.preventDefault()
   }
