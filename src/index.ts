@@ -3,6 +3,7 @@ import { generateProgram, Backend, backends } from './backend'
 import { BackendNotImplementedError } from './backend/errors'
 import { lex } from './lexer'
 import { parse } from './parser'
+import wabt from 'wabt'
 
 const elements = {
   source: document.getElementById('source') as HTMLTextAreaElement,
@@ -15,7 +16,9 @@ const elements = {
   ) as HTMLDivElement,
   assemblyCollapsible: document.getElementById(
     'assembly-collapsible'
-  ) as HTMLButtonElement
+  ) as HTMLButtonElement,
+  watPretty: document.getElementById('wat-pretty') as HTMLDivElement,
+  watPrettyBox: document.getElementById('wat-pretty-box') as HTMLInputElement
 }
 
 const getBackend = (): Backend => {
@@ -30,9 +33,28 @@ const getBackend = (): Backend => {
   throw new Error('unreachable')
 }
 
-const updateAssemblyOutput = (ast: Program): void => {
+const updateBackend = (): void => {
+  if (getBackend() === 'wat') {
+    elements.watPretty.style.display = 'inline'
+  } else {
+    elements.watPretty.style.display = 'none'
+  }
+}
+
+const updateAssemblyOutput = async (ast: Program): Promise<void> => {
   try {
-    elements.assembly.value = generateProgram(ast, getBackend())
+    const backend = getBackend()
+    let result = generateProgram(ast, backend)
+    if (backend === 'wat' && elements.watPrettyBox.checked) {
+      const w = await wabt()
+      const mod = w.parseWat('output.wat', result)
+      mod.applyNames()
+      result = mod.toText({
+        foldExprs: true,
+        inlineExport: true
+      })
+    }
+    elements.assembly.value = result
   } catch (err) {
     if (err instanceof BackendNotImplementedError) {
       elements.assembly.value = err.message
@@ -49,7 +71,7 @@ elements.compile.addEventListener('click', event => {
     elements.lexed.value = JSON.stringify(tokens, null, 2)
     const ast = parse(tokens)
     elements.parsed.value = JSON.stringify(ast, null, 2)
-    updateAssemblyOutput(ast)
+    void updateAssemblyOutput(ast)
   }
 })
 
@@ -83,6 +105,11 @@ for (const radio of [
   )
 ]) {
   radio.addEventListener('change', () => {
-    updateAssemblyOutput(parse(lex(elements.source.value)))
+    updateBackend()
+    void updateAssemblyOutput(parse(lex(elements.source.value)))
   })
 }
+
+elements.watPrettyBox.addEventListener('change', () => {
+  void updateAssemblyOutput(parse(lex(elements.source.value)))
+})

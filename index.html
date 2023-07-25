@@ -11,11 +11,15 @@
       <h1>Web C Compiler — Browser Local</h1>
       <textarea id="source" name="source">
 int main() {
-  return 0;
+  int a = 1;
+  a = a + 1;
+  return a;
 }
-</textarea>
+</textarea
+      >
       <br />
-      <button id="compile">Compile</button> (This button can be pressed with Ctrl+Enter.)
+      <button id="compile">Compile</button> (This button can be pressed with
+      Ctrl+Enter.)
       <button type="button" class="collapsible" target="lexed-section">
         Toggle Lexer Output
       </button>
@@ -44,6 +48,10 @@ int main() {
         <label for="backend-c">C</label>
         <input type="radio" id="backend-wat" name="backend" value="wat" />
         <label for="backend-wat">WebAssembly</label>
+        <div id="wat-pretty">
+          <input type="checkbox" id="wat-pretty-box" name="wat-pretty-box" />
+          <label for="wat-pretty-box">Pretty Print?</label>
+        </div>
       </div>
       <button
         type="button"
