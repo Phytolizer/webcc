@@ -39,6 +39,6 @@
     "serve": "node dist/src/server/index.js",
     "web": "http-server",
     "lint": "eslint src test -f unix",
-    "test": "vitest --run"
+    "test": "vitest --run --reporter=verbose"
   }
 }
