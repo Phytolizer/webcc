@@ -1,0 +1,17 @@
+{
+  "extends": ["standard"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "func-style": ["error", "declaration"]
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "extends": ["standard-with-typescript"],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    }
+  ]
+}

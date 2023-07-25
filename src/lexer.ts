@@ -44,7 +44,7 @@ interface TokenWithRest extends Token {
   rest: string
 }
 
-const nextToken = (source: string): TokenWithRest => {
+function nextToken (source: string): TokenWithRest {
   for (const [key, pattern] of Object.entries(patterns)) {
     const match = source.match(pattern)
     if (match !== null) {
@@ -61,7 +61,7 @@ const nextToken = (source: string): TokenWithRest => {
   return { type: 'error', value: source[0], rest: source.slice(1) }
 }
 
-export const lex = (source: string): Token[] => {
+export function lex (source: string): Token[] {
   const tokens = []
   while (source.length > 0) {
     const { type, value, rest } = nextToken(source)

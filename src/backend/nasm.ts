@@ -4,7 +4,7 @@ import * as ast from '../ast'
 class State {
   stackIndex: number = -8
   labelCount: number = 1
-  variables: Map<string, number> = new Map()
+  variables = new Map<string, number>()
 
   pushVariable (name: string): void {
     this.variables.set(name, this.stackIndex)
@@ -71,7 +71,7 @@ ${this.generateExpression(operand)}
     operator: string,
     right: ast.Expression
   ): string {
-    const cmp = (operator: string): ((e1: string, e2: string) => string) => {
+    function cmp (operator: string): (e1: string, e2: string) => string {
       return (e1: string, e2: string) =>
         stripNewlines(`
     cmp ${e1}, ${e2}
@@ -247,6 +247,6 @@ ${functionDeclaration.body.map(this.generateStatement.bind(this)).join('\n')}
   }
 }
 
-export const generateProgram = (program: ast.Program): string => {
+export function generateProgram (program: ast.Program): string {
   return new State().generateFunction(program.functionDeclaration) + '\n'
 }

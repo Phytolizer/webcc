@@ -1,4 +1,4 @@
-import * as ast from '../ast'
+import type * as ast from '../ast'
 import * as nasm from './nasm'
 import * as wat from './wat'
 import * as llvm from './llvm'
@@ -6,10 +6,10 @@ import * as llvm from './llvm'
 export const backends = ['nasm', 'wat', 'llvm'] as const
 export type Backend = typeof backends[number]
 
-export const generateProgram = (
+export function generateProgram (
   program: ast.Program,
   backend: Backend
-): string => {
+): string {
   switch (backend) {
     case 'nasm':
       return nasm.generateProgram(program)

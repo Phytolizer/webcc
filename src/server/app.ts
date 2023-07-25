@@ -5,17 +5,17 @@ import { lex } from '../lexer'
 import { parse } from '../parser'
 import schema from './schema.json'
 import {
-  CompileRequest,
-  LexRequest,
-  ParseRequest,
-  RequestBody,
+  type CompileRequest,
+  type LexRequest,
+  type ParseRequest,
+  type RequestBody,
   isAstCompileRequest,
   isSourceCompileRequest,
   isTokensCompileRequest
 } from './types'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const getApp = (opts: any) => {
+export function getApp (opts: any) {
   const server = Fastify(opts)
 
   server.post('/', { schema: { body: schema } }, async (request, reply) => {

@@ -1,5 +1,5 @@
 import * as ast from './ast'
-import { Token } from './lexer'
+import { type Token } from './lexer'
 
 export class ParseError extends Error {
   constructor (message: string) {
@@ -8,15 +8,15 @@ export class ParseError extends Error {
   }
 }
 
-const peek = (tokens: Token[], distance = 0): Token => {
+function peek (tokens: Token[], distance = 0): Token {
   return tokens[distance]
 }
 
-const checkToken = (
+function checkToken (
   tokens: Token[],
   type: string,
   distance = 0
-): Token | undefined => {
+): Token | undefined {
   const token = peek(tokens, distance)
   if (token === undefined || token.type !== type) {
     return undefined
@@ -24,7 +24,7 @@ const checkToken = (
   return token
 }
 
-const matchToken = (tokens: Token[], type: string): Token => {
+function matchToken (tokens: Token[], type: string): Token {
   const token = checkToken(tokens, type)
   if (token === undefined) {
     const actualType = tokens[0]?.type ?? 'undefined'
@@ -34,7 +34,7 @@ const matchToken = (tokens: Token[], type: string): Token => {
   return token
 }
 
-const binaryPrecedence = (operator: string): number => {
+function binaryPrecedence (operator: string): number {
   switch (operator) {
     case '*':
     case '/':
@@ -80,7 +80,7 @@ const binaryPrecedence = (operator: string): number => {
   }
 }
 
-const unaryPrecedence = (operator: string): number => {
+function unaryPrecedence (operator: string): number {
   switch (operator) {
     case '-':
     case '!':
@@ -91,7 +91,7 @@ const unaryPrecedence = (operator: string): number => {
   }
 }
 
-const parsePrimary = (tokens: Token[]): ast.Expression => {
+function parsePrimary (tokens: Token[]): ast.Expression {
   switch (peek(tokens).type) {
     case '(': {
       tokens.shift()
@@ -110,10 +110,10 @@ const parsePrimary = (tokens: Token[]): ast.Expression => {
   }
 }
 
-const parseBinaryExpression = (
+function parseBinaryExpression (
   tokens: Token[],
   parentPrecedence = 0
-): ast.Expression => {
+): ast.Expression {
   const unaryPrec = unaryPrecedence(peek(tokens).type)
   let left
   if (unaryPrec !== 0 && unaryPrec >= parentPrecedence) {
@@ -138,7 +138,7 @@ const parseBinaryExpression = (
   return left
 }
 
-const parseExpression = (tokens: Token[]): ast.Expression => {
+function parseExpression (tokens: Token[]): ast.Expression {
   if (
     checkToken(tokens, 'ident', 0) !== undefined &&
     checkToken(tokens, '=', 1) !== undefined
@@ -151,7 +151,7 @@ const parseExpression = (tokens: Token[]): ast.Expression => {
   return parseBinaryExpression(tokens)
 }
 
-const parseStatement = (tokens: Token[]): ast.Statement => {
+function parseStatement (tokens: Token[]): ast.Statement {
   switch (peek(tokens).type) {
     case 'return': {
       matchToken(tokens, 'return')
@@ -178,7 +178,7 @@ const parseStatement = (tokens: Token[]): ast.Statement => {
   }
 }
 
-const parseFunction = (tokens: Token[]): ast.FunctionDeclaration => {
+function parseFunction (tokens: Token[]): ast.FunctionDeclaration {
   matchToken(tokens, 'int')
   const name = matchToken(tokens, 'ident').value
   matchToken(tokens, '(')
@@ -196,6 +196,6 @@ const parseFunction = (tokens: Token[]): ast.FunctionDeclaration => {
   return new ast.FunctionDeclaration(name, body)
 }
 
-export const parse = (tokens: Token[]): ast.Program => {
+export function parse (tokens: Token[]): ast.Program {
   return new ast.Program(parseFunction(tokens.filter(t => t.type !== 'space')))
 }

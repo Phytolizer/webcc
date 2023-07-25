@@ -1,4 +1,4 @@
-import { getApp } from '../src/server/app'
+import { type getApp } from '../src/server/app'
 
 declare global {
   // eslint-disable-next-line no-var

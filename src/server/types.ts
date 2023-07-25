@@ -1,6 +1,6 @@
-import { Backend } from '../backend'
-import { Token } from '../lexer'
-import * as ast from '../ast'
+import { type Backend } from '../backend'
+import { type Token } from '../lexer'
+import type * as ast from '../ast'
 
 export interface RequestBody {
   type: string
@@ -25,24 +25,29 @@ export interface SourceCompileRequest extends CompileRequest {
   source: string
 }
 
-export const isSourceCompileRequest = (
+export function isSourceCompileRequest (
   object: any
-): object is SourceCompileRequest => 'source' in object
+): object is SourceCompileRequest {
+  return 'source' in object
+}
 
 export interface TokensCompileRequest extends CompileRequest {
   tokens: Token[]
 }
 
-export const isTokensCompileRequest = (
+export function isTokensCompileRequest (
   object: any
-): object is TokensCompileRequest => 'tokens' in object
+): object is TokensCompileRequest {
+  return 'tokens' in object
+}
 
 export interface AstCompileRequest extends CompileRequest {
   ast: ast.Program
 }
 
-export const isAstCompileRequest = (object: any): object is AstCompileRequest =>
-  'ast' in object
+export function isAstCompileRequest (object: any): object is AstCompileRequest {
+  return 'ast' in object
+}
 
 export type ConcreteRequestBody =
   | LexRequest

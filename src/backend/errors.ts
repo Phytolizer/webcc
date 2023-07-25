@@ -1,4 +1,4 @@
-import { Backend } from '.'
+import { type Backend } from '.'
 
 export class NotImplementedError extends Error {
   constructor (feature: string) {

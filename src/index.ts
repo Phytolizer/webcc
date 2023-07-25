@@ -1,5 +1,5 @@
-import { Program } from './ast'
-import { generateProgram, Backend, backends } from './backend'
+import { type Program } from './ast'
+import { generateProgram, type Backend, backends } from './backend'
 import { BackendNotImplementedError } from './backend/errors'
 import { lex } from './lexer'
 import { parse } from './parser'
@@ -22,7 +22,7 @@ const elements = {
   executeButton: document.getElementById('execute') as HTMLButtonElement
 }
 
-const getBackend = (): Backend => {
+function getBackend (): Backend {
   for (const backend of [...backends]) {
     const radio = document.getElementById(
       `backend-${backend}`
@@ -40,7 +40,7 @@ window.addEventListener('load', () => {
   elements.executeButton.title = executeDisabled
 })
 
-const updateBackend = (): void => {
+function updateBackend (): void {
   if (getBackend() === 'wat') {
     elements.watPretty.style.display = 'inline'
     elements.executeButton.disabled = false
@@ -52,7 +52,7 @@ const updateBackend = (): void => {
   }
 }
 
-const execute = async (): Promise<void> => {
+async function execute (): Promise<void> {
   if (getBackend() !== 'wat') {
     // invariant: 'execute' is only clickable when backend === 'wat'
     throw new Error('unreachable')
@@ -64,7 +64,7 @@ const execute = async (): Promise<void> => {
   mod.applyNames()
   const { buffer } = mod.toBinary({})
   const { instance } = await WebAssembly.instantiate(buffer)
-  const result = (instance.exports.main as Function)() as number
+  const result = (instance.exports.main as () => number)()
   alert(`Return value: ${result}`)
 }
 
@@ -72,7 +72,7 @@ elements.executeButton.addEventListener('click', () => {
   void execute()
 })
 
-const updateAssemblyOutput = async (ast: Program): Promise<void> => {
+async function updateAssemblyOutput (ast: Program): Promise<void> {
   try {
     const backend = getBackend()
     let result = generateProgram(ast, backend)

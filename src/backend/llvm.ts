@@ -1,6 +1,6 @@
-import * as ast from '../ast'
+import type * as ast from '../ast'
 import { BackendNotImplementedError } from './errors'
 
-export const generateProgram = (program: ast.Program): string => {
+export function generateProgram (program: ast.Program): string {
   throw new BackendNotImplementedError('llvm')
 }

@@ -1,13 +1,13 @@
 import * as ast from '../ast'
 import { NotImplementedError } from './errors'
 
-const sexp = (name: string, ...args: string[]): string => {
+function sexp (name: string, ...args: string[]): string {
   return `(${[name, ...args].join(' ')})`
 }
 
 class State {
   memIndex: number = 0
-  variables: Map<string, number> = new Map()
+  variables = new Map<string, number>()
 
   pushVariable (name: string): void {
     this.variables.set(name, this.memIndex)
@@ -177,7 +177,7 @@ class State {
     }
   }
 
-  generateFunction = (functionDeclaration: ast.FunctionDeclaration): string => {
+  generateFunction (functionDeclaration: ast.FunctionDeclaration): string {
     return sexp(
       'func',
       `$${functionDeclaration.name}`,
@@ -189,7 +189,7 @@ class State {
   }
 }
 
-export const generateProgram = (program: ast.Program): string => {
+export function generateProgram (program: ast.Program): string {
   return sexp(
     'module',
     sexp('memory', '1', '100'),

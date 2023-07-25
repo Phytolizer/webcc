@@ -1,4 +1,4 @@
-export const stripNewlines = (s: string): string => {
+export function stripNewlines (s: string): string {
   while (s[0] === '\n') {
     s = s.slice(1)
   }
