@@ -8,6 +8,6 @@ RESTful C compiler. Uses great things like JSON and APIs. Had enough buzzwords y
 - [x] Compile basic binary operators (`+`, `-`, `*`, `/`)
 - [x] Compile many more binary operators (`&&`, `%`, `^`, `<<`, ...)
 - [x] Compile local variable declarations and usages (type `int`)
-- [ ] Compound assignment operators (`+=`, `-=`, ...)
+- [x] Compound assignment operators (`+=`, `-=`, ...)
 - [ ] Prefix/postfix increment/decrement operators (`++`, `--`)
 - [ ] Conditionals (`if`, `?`)

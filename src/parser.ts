@@ -138,14 +138,38 @@ function parseBinaryExpression (
   return left
 }
 
+const assignmentOperators = [
+  '=',
+  '+=',
+  '-=',
+  '*=',
+  '/=',
+  '%=',
+  '<<=',
+  '>>=',
+  '&=',
+  '^=',
+  '|='
+]
+
 function parseExpression (tokens: Token[]): ast.Expression {
   if (
     checkToken(tokens, 'ident', 0) !== undefined &&
-    checkToken(tokens, '=', 1) !== undefined
+    assignmentOperators.includes(peek(tokens, 1)?.type)
   ) {
     const name = matchToken(tokens, 'ident').value
-    matchToken(tokens, '=')
-    const expression = parseExpression(tokens)
+    const assignOp = tokens.shift()?.type
+    if (assignOp === undefined) {
+      throw new Error('unreachable')
+    }
+    let expression = parseExpression(tokens)
+    if (assignOp !== '=') {
+      expression = new ast.BinaryOp(
+        new ast.VarExpression(name),
+        assignOp.slice(0, -1),
+        expression
+      )
+    }
     return new ast.AssignExpression(name, expression)
   }
   return parseBinaryExpression(tokens)

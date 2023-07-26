@@ -78,6 +78,26 @@ test.each(
     {
       body: ['int a = 1;', 'int b = 0;', 'a || (b = 5);', 'return b;'],
       expectedResult: 0
+    },
+    {
+      body: ['int a = 1;', 'a += 1;', 'return a;'],
+      expectedResult: 2
+    },
+    {
+      body: ['int a = 12;', 'a %= 5;', 'return a;'],
+      expectedResult: 2
+    },
+    {
+      body: ['int a = 12;', 'a /= 3;', 'return a;'],
+      expectedResult: 4
+    },
+    {
+      body: ['int a = 12;', 'a *= 3 - 1;', 'return a;'],
+      expectedResult: 24
+    },
+    {
+      body: ['int a = 2;', 'a <<= 2;', 'return a;'],
+      expectedResult: 8
     }
   ].map(processTest)
 )('should compile $body', async ({ source, expectedResult }) => {
