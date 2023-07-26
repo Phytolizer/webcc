@@ -11,3 +11,4 @@ RESTful C compiler. Uses great things like JSON and APIs. Had enough buzzwords y
 - [x] Compound assignment operators (`+=`, `-=`, ...)
 - [ ] Prefix/postfix increment/decrement operators (`++`, `--`)
 - [ ] Conditionals (`if`, `?`)
+- [ ] Block syntax (lexical scoping)
