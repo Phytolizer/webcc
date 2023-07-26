@@ -37,7 +37,7 @@
     "dist": "webpack --mode=production && tsc",
     "build": "node src/server/genSchema.js && tsc",
     "serve": "node dist/src/server/index.js",
-    "web": "http-server",
+    "web": "http-server -p 8081",
     "lint": "eslint src test -f unix",
     "test": "vitest --run --reporter=verbose"
   }

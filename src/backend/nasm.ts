@@ -116,7 +116,8 @@ ${this.generateExpression(operand)}
         stripNewlines(`
     mov rcx, ${e2}
     sar ${e1}, cl
-`)
+`),
+      ',': (e1: string, e2: string) => ''
     }
     for (const [op, f] of Object.entries(arithmeticOps)) {
       if (operator === op) {
@@ -125,7 +126,7 @@ ${this.generateExpression(left)}
     push rax
 ${this.generateExpression(right)}
     pop rcx
-${f('rcx', 'rax')}
+${f('rax', 'rcx')}
 `)
       }
     }

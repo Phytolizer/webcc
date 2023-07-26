@@ -57,6 +57,14 @@ class State {
     }
 
     switch (binary.operator) {
+      case ',': {
+        return [
+          ...this.generateExpression(binary.left),
+          ...this.generateExpression(binary.right),
+          sexp('call', '$swap'),
+          sexp('drop')
+        ]
+      }
       case '&&': {
         return [
           ...this.generateExpression(binary.left),

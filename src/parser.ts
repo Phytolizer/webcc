@@ -152,7 +152,7 @@ const assignmentOperators = [
   '|='
 ]
 
-function parseExpression (tokens: Token[]): ast.Expression {
+function parseAssignmentExpression (tokens: Token[]): ast.Expression {
   if (
     checkToken(tokens, 'ident', 0) !== undefined &&
     assignmentOperators.includes(peek(tokens, 1)?.type)
@@ -172,7 +172,17 @@ function parseExpression (tokens: Token[]): ast.Expression {
     }
     return new ast.AssignExpression(name, expression)
   }
-  return parseBinaryExpression(tokens)
+  const lhs = parseBinaryExpression(tokens)
+  if (checkToken(tokens, ',') !== undefined) {
+    const comma = matchToken(tokens, ',')
+    const rhs = parseAssignmentExpression(tokens)
+    return new ast.BinaryOp(lhs, comma.type, rhs)
+  }
+  return lhs
+}
+
+function parseExpression (tokens: Token[]): ast.Expression {
+  return parseAssignmentExpression(tokens)
 }
 
 function parseStatement (tokens: Token[]): ast.Statement {

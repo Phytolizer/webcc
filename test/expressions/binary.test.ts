@@ -189,6 +189,10 @@ test.each([
   {
     expr: '16 >> 3',
     expectedResult: 2
+  },
+  {
+    expr: '1, 2',
+    expectedResult: 2
   }
 ])('should compile $expr', async ({ expr, expectedResult }) => {
   const result = await compileAndRun(`int main() { return ${expr}; }`)
