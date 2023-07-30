@@ -4,6 +4,7 @@ import { BackendNotImplementedError } from './backend/errors'
 import { lex } from './lexer'
 import { parse } from './parser'
 import wabt from 'wabt'
+import './styles.css'
 
 const elements = {
   source: document.getElementById('source') as HTMLTextAreaElement,
