@@ -12,84 +12,94 @@ function peek (tokens: Token[], distance = 0): Token {
   return tokens[distance]
 }
 
-function checkToken (
-  tokens: Token[],
-  type: string,
-  distance = 0
-): Token | undefined {
+function checkToken (tokens: Token[], type: string, distance = 0): boolean {
   const token = peek(tokens, distance)
-  if (token === undefined || token.type !== type) {
-    return undefined
-  }
-  return token
+  return token?.type === type
 }
 
 function matchToken (tokens: Token[], type: string): Token {
-  const token = checkToken(tokens, type)
-  if (token === undefined) {
-    const actualType = tokens[0]?.type ?? 'undefined'
+  const token = peek(tokens)
+  if (token?.type !== type) {
+    const actualType = token?.type ?? 'undefined'
     throw new ParseError(`Expected token type ${type}, but got ${actualType}`)
   }
   tokens.shift()
   return token
 }
 
-function binaryPrecedence (operator: string): number {
-  switch (operator) {
-    case '*':
-    case '/':
-    case '%': {
-      return 10
-    }
-    case '+':
-    case '-': {
-      return 9
-    }
-    case '<<':
-    case '>>': {
-      return 8
-    }
-    case '==':
-    case '!=': {
-      return 7
-    }
-    case '<':
-    case '>':
-    case '<=':
-    case '>=': {
-      return 6
-    }
-    case '&': {
-      return 5
-    }
-    case '^': {
-      return 4
-    }
-    case '|': {
-      return 3
-    }
-    case '&&': {
-      return 2
-    }
-    case '||': {
-      return 1
-    }
-    default: {
-      return 0
-    }
+type Associativity = 'left' | 'right'
+
+interface Operator {
+  type: string
+  precedence: number
+  associativity: Associativity
+}
+
+function simpleOp (type: string, precedence: number): Operator {
+  return {
+    type,
+    precedence,
+    associativity: 'left'
   }
 }
 
-function unaryPrecedence (operator: string): number {
-  switch (operator) {
-    case '-':
-    case '!':
-    case '~':
-      return 11
-    default:
-      return 0
+const assignmentOperators = [
+  '=',
+  '+=',
+  '-=',
+  '*=',
+  '/=',
+  '%=',
+  '<<=',
+  '>>=',
+  '&=',
+  '^=',
+  '|='
+]
+
+const ops = [
+  simpleOp('*', 12),
+  simpleOp('/', 12),
+  simpleOp('%', 12),
+  simpleOp('+', 11),
+  simpleOp('-', 11),
+  simpleOp('<<', 10),
+  simpleOp('>>', 10),
+  simpleOp('==', 9),
+  simpleOp('!=', 9),
+  simpleOp('<', 8),
+  simpleOp('>', 8),
+  simpleOp('<=', 8),
+  simpleOp('>=', 8),
+  simpleOp('&', 7),
+  simpleOp('^', 6),
+  simpleOp('|', 5),
+  simpleOp('&&', 4),
+  simpleOp('||', 3),
+  ...assignmentOperators.map(op => {
+    return {
+      type: op,
+      precedence: 2,
+      associativity: 'right'
+    }
+  }),
+  simpleOp(',', 1)
+]
+
+const unaryOps = [
+  {
+    type: '-',
+    precedence: 13
+  },
+  {
+    type: '!',
+    precedence: 13
+  },
+  {
+    type: '~',
+    precedence: 13
   }
-}
+]
 
 function parsePrimary (tokens: Token[]): ast.Expression {
   switch (peek(tokens).type) {
@@ -114,47 +124,54 @@ function parseBinaryExpression (
   tokens: Token[],
   parentPrecedence = 0
 ): ast.Expression {
-  const unaryPrec = unaryPrecedence(peek(tokens).type)
+  const unop = unaryOps.find(op => op.type === peek(tokens).type)
   let left
-  if (unaryPrec !== 0 && unaryPrec >= parentPrecedence) {
+  if (unop !== undefined && unop.precedence >= parentPrecedence) {
     const operator = tokens.shift() ?? { type: 'undefined', value: '' }
-    const operand = parseBinaryExpression(tokens, unaryPrec)
+    const operand = parseBinaryExpression(tokens, unop.precedence)
     left = new ast.UnaryOp(operator.type, operand)
   } else {
     left = parsePrimary(tokens)
   }
 
   while (true) {
-    const precedence = binaryPrecedence(peek(tokens).type)
-    if (precedence === 0 || precedence <= parentPrecedence) {
+    const op = ops.find(op => op.type === peek(tokens).type)
+    if (op === undefined || op.precedence <= parentPrecedence) {
       break
     }
 
-    const operator = tokens.shift() ?? { type: 'undefined', value: '' }
-    const right = parseBinaryExpression(tokens, precedence)
-    left = new ast.BinaryOp(left, operator.type, right)
+    tokens.shift()
+
+    const recursivePrecedence =
+      op.associativity === 'left' ? op.precedence : op.precedence - 1
+
+    let right = parseBinaryExpression(tokens, recursivePrecedence)
+    if (assignmentOperators.includes(op.type)) {
+      if (left.type !== 'varExpression') {
+        throw new ParseError(
+          'Expected left side of assignment to be a variable'
+        )
+      }
+      const name: string = (left as ast.VarExpression).name
+      if (op.type !== '=') {
+        right = new ast.BinaryOp(
+          new ast.VarExpression(name),
+          op.type.slice(0, -1),
+          right
+        )
+      }
+      left = new ast.AssignExpression(name, right)
+    } else {
+      left = new ast.BinaryOp(left, op.type, right)
+    }
   }
 
   return left
 }
 
-const assignmentOperators = [
-  '=',
-  '+=',
-  '-=',
-  '*=',
-  '/=',
-  '%=',
-  '<<=',
-  '>>=',
-  '&=',
-  '^=',
-  '|='
-]
-
 function parseAssignmentExpression (tokens: Token[]): ast.Expression {
   if (
-    checkToken(tokens, 'ident', 0) !== undefined &&
+    checkToken(tokens, 'ident', 0) &&
     assignmentOperators.includes(peek(tokens, 1)?.type)
   ) {
     const name = matchToken(tokens, 'ident').value
@@ -172,13 +189,7 @@ function parseAssignmentExpression (tokens: Token[]): ast.Expression {
     }
     return new ast.AssignExpression(name, expression)
   }
-  const lhs = parseBinaryExpression(tokens)
-  if (checkToken(tokens, ',') !== undefined) {
-    const comma = matchToken(tokens, ',')
-    const rhs = parseAssignmentExpression(tokens)
-    return new ast.BinaryOp(lhs, comma.type, rhs)
-  }
-  return lhs
+  return parseBinaryExpression(tokens)
 }
 
 function parseExpression (tokens: Token[]): ast.Expression {
@@ -197,7 +208,7 @@ function parseStatement (tokens: Token[]): ast.Statement {
       matchToken(tokens, 'int')
       const name = matchToken(tokens, 'ident').value
       let expression
-      if (checkToken(tokens, '=') !== undefined) {
+      if (checkToken(tokens, '=')) {
         matchToken(tokens, '=')
         expression = parseExpression(tokens)
       }
@@ -219,10 +230,7 @@ function parseFunction (tokens: Token[]): ast.FunctionDeclaration {
   matchToken(tokens, ')')
   matchToken(tokens, '{')
   const body = []
-  while (
-    checkToken(tokens, 'eof') === undefined &&
-    checkToken(tokens, '}') === undefined
-  ) {
+  while (!checkToken(tokens, 'eof') && !checkToken(tokens, '}')) {
     body.push(parseStatement(tokens))
   }
   // main should always finish with return 0
