@@ -96,7 +96,7 @@ async function updateAssemblyOutput (ast: Program): Promise<void> {
   }
 }
 
-elements.compile.addEventListener('click', event => {
+elements.compile.addEventListener('click', (event) => {
   if ((event.target as Element).id === 'compile') {
     const source = elements.source.value
     const tokens = lex(source)
@@ -107,7 +107,7 @@ elements.compile.addEventListener('click', event => {
   }
 })
 
-document.onkeydown = event => {
+document.onkeydown = (event) => {
   if (event.key === 'Enter' && event.ctrlKey && event.shiftKey) {
     elements.executeButton.click()
     event.preventDefault()
@@ -136,7 +136,8 @@ elements.assemblyCollapsible.dispatchEvent(new Event('click'))
 
 for (const radio of [
   ...backends.map(
-    backend => document.getElementById(`backend-${backend}`) as HTMLInputElement
+    (backend) =>
+      document.getElementById(`backend-${backend}`) as HTMLInputElement
   )
 ]) {
   radio.addEventListener('change', () => {

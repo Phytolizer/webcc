@@ -60,8 +60,46 @@ ${this.generateExpression(operand)}
     neg rax
 `)
       }
+      case '++': {
+        return stripNewlines(`
+${this.generateExpression(operand)}
+inc rax
+mov [rbp${this.getVariable((operand as ast.VarExpression).name)}], rax
+`)
+      }
+      case '--': {
+        return stripNewlines(`
+${this.generateExpression(operand)}
+dec rax
+mov [rbp${this.getVariable((operand as ast.VarExpression).name)}], rax
+`)
+      }
       default: {
         throw new Error(`Unexpected unary operator ${operator}`)
+      }
+    }
+  }
+
+  generatePostfix (left: ast.Expression, operator: string): string {
+    switch (operator) {
+      case '++': {
+        return stripNewlines(`
+${this.generateExpression(left)}
+mov rbx, rax
+inc rbx
+mov [rbp${this.getVariable((left as ast.VarExpression).name)}], rbx
+`)
+      }
+      case '--': {
+        return stripNewlines(`
+${this.generateExpression(left)}
+mov rbx, rax
+dec rbx
+mov [rbp${this.getVariable((left as ast.VarExpression).name)}], rbx
+`)
+      }
+      default: {
+        throw new Error(`Unexpected postfix operator ${operator}`)
       }
     }
   }
@@ -181,6 +219,10 @@ ${labelEnd}:
       case 'unaryOp': {
         const u = expression as ast.UnaryOp
         return this.generateUnary(u.operator, u.operand)
+      }
+      case 'postfixOp': {
+        const p = expression as ast.PostfixOp
+        return this.generatePostfix(p.left, p.operator)
       }
       case 'binaryOp': {
         const b = expression as ast.BinaryOp

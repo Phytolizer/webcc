@@ -9,7 +9,10 @@ export class Program implements Node {
 
 export class FunctionDeclaration implements Node {
   type = 'functionDeclaration'
-  constructor (public name: string, public body: Statement[]) {}
+  constructor (
+    public name: string,
+    public body: Statement[]
+  ) {}
 }
 
 export interface Statement extends Node {}
@@ -21,7 +24,10 @@ export class ReturnStatement implements Statement {
 
 export class DeclareStatement implements Statement {
   type = 'declareStatement'
-  constructor (public name: string, public expression?: Expression) {}
+  constructor (
+    public name: string,
+    public expression?: Expression
+  ) {}
 }
 
 export class ExpressionStatement implements Statement {
@@ -30,6 +36,14 @@ export class ExpressionStatement implements Statement {
 }
 
 export interface Expression extends Node {}
+
+export class PostfixOp implements Expression {
+  type = 'postfixOp'
+  constructor (
+    public left: Expression,
+    public operator: string
+  ) {}
+}
 
 export class BinaryOp implements Expression {
   type = 'binaryOp'
@@ -42,7 +56,10 @@ export class BinaryOp implements Expression {
 
 export class UnaryOp implements Expression {
   type = 'unaryOp'
-  constructor (public operator: string, public operand: Expression) {}
+  constructor (
+    public operator: string,
+    public operand: Expression
+  ) {}
 }
 
 export class Constant implements Expression {
@@ -57,5 +74,8 @@ export class VarExpression implements Expression {
 
 export class AssignExpression implements Expression {
   type = 'assignExpression'
-  constructor (public name: string, public expression: Expression) {}
+  constructor (
+    public name: string,
+    public expression: Expression
+  ) {}
 }

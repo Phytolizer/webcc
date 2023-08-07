@@ -4,7 +4,7 @@ import * as wat from './wat'
 import * as llvm from './llvm'
 
 export const backends = ['nasm', 'wat', 'llvm'] as const
-export type Backend = typeof backends[number]
+export type Backend = (typeof backends)[number]
 
 export function generateProgram (
   program: ast.Program,

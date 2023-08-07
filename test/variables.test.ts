@@ -8,7 +8,7 @@ import {
 function processBody (body: string[]): string {
   return `
 int main() {
-${body.map(s => '  ' + s).join('\n')}
+${body.map((s) => '  ' + s).join('\n')}
 }`
 }
 
@@ -120,7 +120,7 @@ describe('failures', () => {
       ['int a = 2', 'a = a + 4;', 'return a;'],
       ['return a;'],
       ['a = 1 + 2;', 'int a;', 'return a;']
-    ].map(body => processTest({ body }))
+    ].map((body) => processTest({ body }))
   )('should fail to compile $body', async ({ source }) => {
     await expect(compileAndRun(source)).rejects.toThrow()
   })

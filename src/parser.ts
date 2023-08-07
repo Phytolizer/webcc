@@ -33,13 +33,15 @@ interface Operator {
   type: string
   precedence: number
   associativity: Associativity
+  postfix: boolean
 }
 
 function simpleOp (type: string, precedence: number): Operator {
   return {
     type,
     precedence,
-    associativity: 'left'
+    associativity: 'left',
+    postfix: false
   }
 }
 
@@ -57,7 +59,17 @@ const assignmentOperators = [
   '|='
 ]
 
+const incDecOps = ['++', '--']
+
 const ops = [
+  ...incDecOps.map((type) => {
+    return {
+      type,
+      precedence: 13,
+      associativity: 'left',
+      postfix: true
+    }
+  }),
   simpleOp('*', 12),
   simpleOp('/', 12),
   simpleOp('%', 12),
@@ -76,30 +88,20 @@ const ops = [
   simpleOp('|', 5),
   simpleOp('&&', 4),
   simpleOp('||', 3),
-  ...assignmentOperators.map(op => {
+  ...assignmentOperators.map((type) => {
     return {
-      type: op,
+      type,
       precedence: 2,
-      associativity: 'right'
+      associativity: 'right',
+      postfix: false
     }
   }),
   simpleOp(',', 1)
 ]
 
-const unaryOps = [
-  {
-    type: '-',
-    precedence: 13
-  },
-  {
-    type: '!',
-    precedence: 13
-  },
-  {
-    type: '~',
-    precedence: 13
-  }
-]
+const unaryOps = ['-', '!', '~', ...incDecOps].map((type) => {
+  return { type, precedence: 13 }
+})
 
 function parsePrimary (tokens: Token[]): ast.Expression {
   switch (peek(tokens).type) {
@@ -124,23 +126,31 @@ function parseBinaryExpression (
   tokens: Token[],
   parentPrecedence = 0
 ): ast.Expression {
-  const unop = unaryOps.find(op => op.type === peek(tokens).type)
+  const unop = unaryOps.find((op) => op.type === peek(tokens).type)
   let left
   if (unop !== undefined && unop.precedence >= parentPrecedence) {
     const operator = tokens.shift() ?? { type: 'undefined', value: '' }
     const operand = parseBinaryExpression(tokens, unop.precedence)
+    if (incDecOps.includes(operator.type) && operand.type !== 'varExpression') {
+      throw new ParseError(`cannot use operator '${operator.type}' on non-variable`)
+    }
     left = new ast.UnaryOp(operator.type, operand)
   } else {
     left = parsePrimary(tokens)
   }
 
   while (true) {
-    const op = ops.find(op => op.type === peek(tokens).type)
+    const op = ops.find((op) => op.type === peek(tokens).type)
     if (op === undefined || op.precedence <= parentPrecedence) {
       break
     }
 
     tokens.shift()
+
+    if (op.postfix) {
+      left = new ast.PostfixOp(left, op.type)
+      continue
+    }
 
     const recursivePrecedence =
       op.associativity === 'left' ? op.precedence : op.precedence - 1
@@ -218,6 +228,6 @@ function parseFunction (tokens: Token[]): ast.FunctionDeclaration {
 }
 
 export function parse (tokens: Token[]): ast.Program {
-  const significantTokens = tokens.filter(t => t.type !== 'space')
+  const significantTokens = tokens.filter((t) => t.type !== 'space')
   return new ast.Program(parseFunction(significantTokens))
 }
