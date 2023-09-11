@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+        <title>WebCC</title>
+        <style>
+            html {
+                height: 100%;
+                background: fixed;
+                background: rgb(0, 0, 0);
+                background: linear-gradient(
+                    38deg,
+                    rgba(2, 2, 2, 1) 0%,
+                    rgba(8, 8, 17, 1) 87%,
+                    rgba(0, 14, 27, 1) 100%
+                );
+            }
+            * {
+                color: white;
+                font-family: sans-serif;
+            }
+            textarea {
+                background-color: black;
+                color: white;
+                border: 1px solid white;
+                font-family: monospace;
+                font-size: 1.2em;
+                border-radius: 5px;
+                resize: both;
+                padding: 0.1em;
+            }
+            textarea:focus {
+                box-shadow: 0 0 0.4em white;
+            }
+            button {
+                background-color: rgb(0, 57, 0);
+                transition: background 250ms ease-in-out;
+                cursor: pointer;
+                border: 0.1em solid rgb(171, 171, 171);
+                border-radius: 2px;
+                padding: 0.5em;
+            }
+            button:hover {
+                background-color: rgb(0, 77, 0);
+            }
+            button:disabled,
+            button[disabled] {
+                background-color: rgb(50, 50, 50);
+                color: rgb(171, 171, 171);
+                cursor: not-allowed;
+            }
+            output {
+                font-family: monospace;
+            }
+            .collapsible {
+                margin-top: 1em;
+                padding: 0.5em;
+                width: 100%;
+                border: none;
+                text-align: left;
+                outline: none;
+                font-size: 1.2em;
+                font-weight: bold;
+                background: rgb(22, 22, 22);
+                background: linear-gradient(
+                    180deg,
+                    rgba(22, 22, 22, 1) 0%,
+                    rgba(36, 36, 36, 1) 100%
+                );
+                color: white;
+            }
+            .active,
+            .collapsible:hover {
+                background-color: rgb(50, 50, 50);
+            }
+            .collapsible-content {
+                padding: 0 1em;
+                display: none;
+                overflow: hidden;
+                background-color: rgb(36, 36, 36);
+            }
+            #assembler-output {
+                display: block;
+            }
+            #wat-pretty {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content">
+            <h1>Web C Compiler</h1>
+            <textarea name="source" id="source" cols="80" rows="15">
+int main() {
+    int a = 1;
+    a = a + 1;
+    return a;
+}
+</textarea>
+            <br />
+            <button id="compile">Compile</button>
+            <br />
+            <button id="execute" disabled>Execute</button>
+            <button type="button" class="collapsible" target="lexer-output">
+                Toggle lexer output
+            </button>
+            <div class="collapsible-content" id="lexer-output">
+                <pre><output id="lexed" for="source"></output></pre>
+            </div>
+            <button type="button" class="collapsible" target="parser-output">
+                Toggle parser output
+            </button>
+            <div id="parser-output" class="collapsible-content">
+                <pre><output id="parsed" for="source"></output></pre>
+            </div>
+            <div id="backend-selector">
+                <h3>Backend:</h3>
+                <input
+                    type="radio"
+                    name="backend"
+                    id="backend-nasm"
+                    value="nasm"
+                    checked
+                />
+                <label for="backend-nasm">NASM</label>
+                <input
+                    type="radio"
+                    name="backend"
+                    id="backend-llvm"
+                    value="llvm"
+                />
+                <label for="backend-llvm">LLVM</label>
+                <input
+                    type="radio"
+                    name="backend"
+                    id="backend-wat"
+                    value="wat"
+                />
+                <label for="backend-wat">WebAssembly</label>
+                <div id="wat-pretty">
+                    <input
+                        type="checkbox"
+                        name="wat-pretty-box"
+                        id="wat-pretty-box"
+                    />
+                    <label for="wat-pretty-box"></label>
+                </div>
+            </div>
+            <button type="button" class="collapsible" target="assembler-output">
+                Toggle assembler output
+            </button>
+            <div id="assembler-output" class="collapsible-content">
+                <pre><output id="assembly" for="source"></output></pre>
+            </div>
+        </div>
+        <script src="./index.js"></script>
+    </body>
+</html>
