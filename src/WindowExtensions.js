@@ -8,6 +8,6 @@ export function getComputedStyle(win) {
     return function (elt) {
         return function () {
             return win.getComputedStyle(elt);
-        }
-    }
+        };
+    };
 }
