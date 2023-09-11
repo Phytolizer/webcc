@@ -1,8 +1,7 @@
 module Lexer
   ( Token
   , lex
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -119,7 +118,8 @@ lex :: String -> Array Token
 lex = go Nil
   where
   go acc src =
-    if length src == 0 then Array.fromFoldable acc # Array.reverse
+    if length src == 0 then
+      Array.fromFoldable (Cons { kind: "eof", value: "" } acc) # Array.reverse
     else
       let
         { token, rest } = nextToken src

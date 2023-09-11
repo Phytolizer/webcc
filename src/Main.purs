@@ -4,11 +4,13 @@ module Main
 
 import Prelude
 
+import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromJust)
 import Data.Traversable (traverse_)
 import Effect (Effect)
-import JSON (showTokens)
+import JSON (showAST, showTokens)
 import Lexer (lex)
+import Parser (parse)
 import Partial.Unsafe (unsafePartial)
 import Web.CSSOM.CSSStyleDeclaration as CSSStyleDeclaration
 import Web.CSSOM.ElementCSSInlineStyle (style)
@@ -121,14 +123,19 @@ hookCollapsibles win htmlDoc =
             addEventListener click onClick' false target
 
 compileFunc :: PageElements -> Effect EventListener
-compileFunc (PageElements { source, lexerOutput }) = eventListener \_ -> do
+compileFunc (PageElements { source, lexerOutput, parserOutput }) = eventListener \_ -> do
   text <- TextArea.value source
   ( let
       tokens = lex text
+      ast = parse tokens
     in
       do
         result <- showTokens tokens
         Output.setValue result lexerOutput
+        parserText <- case ast of
+          Left errMsg -> pure errMsg
+          Right program -> showAST program
+        Output.setValue parserText parserOutput
   )
 
 main :: Effect Unit
