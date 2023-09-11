@@ -12,12 +12,17 @@ to generate this file without the comments in this block.
 -}
 { name = "my-project"
 , dependencies =
-  [ "console"
+  [ "arrays"
+  , "console"
   , "effect"
+  , "either"
   , "foldable-traversable"
+  , "lists"
   , "maybe"
+  , "ordered-collections"
   , "partial"
   , "prelude"
+  , "strings"
   , "web-cssom"
   , "web-dom"
   , "web-events"

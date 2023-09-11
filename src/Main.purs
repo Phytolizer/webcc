@@ -7,6 +7,8 @@ import Prelude
 import Data.Maybe (Maybe, fromJust)
 import Data.Traversable (traverse_)
 import Effect (Effect)
+import JSON (showTokens)
+import Lexer (lex)
 import Partial.Unsafe (unsafePartial)
 import Web.CSSOM.CSSStyleDeclaration as CSSStyleDeclaration
 import Web.CSSOM.ElementCSSInlineStyle (style)
@@ -31,15 +33,15 @@ import Web.HTML.Window (document, toEventTarget)
 import WindowExtensions (getComputedStyle)
 
 data PageElements = PageElements
-  { pageSource :: HTMLTextAreaElement
-  , pageLexerOutput :: HTMLOutputElement
-  , pageParserOutput :: HTMLOutputElement
-  , pageAssemblerOutput :: HTMLOutputElement
-  , pageCompileButton :: HTMLButtonElement
-  , pageBackendSelector :: HTMLDivElement
-  , pageWatPrettyDiv :: HTMLDivElement
-  , pageWatPrettyBox :: HTMLInputElement
-  , pageExecuteButton :: HTMLButtonElement
+  { source :: HTMLTextAreaElement
+  , lexerOutput :: HTMLOutputElement
+  , parserOutput :: HTMLOutputElement
+  , assemblerOutput :: HTMLOutputElement
+  , compileButton :: HTMLButtonElement
+  , backendSelector :: HTMLDivElement
+  , watPrettyDiv :: HTMLDivElement
+  , watPrettyBox :: HTMLInputElement
+  , executeButton :: HTMLButtonElement
   }
 
 forceGetAs :: forall a. Partial => (Element -> Maybe a) -> String -> NonElementParentNode -> Effect a
@@ -48,39 +50,39 @@ forceGetAs f name doc = getElementById name doc
   <#> f
   <#> fromJust
 
-getPageElements :: Partial => HTMLDocument -> Effect PageElements
-getPageElements htmlDoc =
+getPageElements :: HTMLDocument -> Effect PageElements
+getPageElements htmlDoc = unsafePartial
   let
     doc = toNonElementParentNode htmlDoc
   in
     do
-      pageSource <- forceGetAs TextArea.fromElement "source" doc
-      pageLexerOutput <- forceGetAs Output.fromElement "lexed" doc
-      pageParserOutput <- forceGetAs Output.fromElement "parsed" doc
-      pageAssemblerOutput <- forceGetAs Output.fromElement "assembly" doc
-      pageCompileButton <- forceGetAs Button.fromElement "compile" doc
-      pageBackendSelector <- forceGetAs Div.fromElement "backend-selector" doc
-      pageWatPrettyDiv <- forceGetAs Div.fromElement "wat-pretty" doc
-      pageWatPrettyBox <- forceGetAs Input.fromElement "wat-pretty-box" doc
-      pageExecuteButton <- forceGetAs Button.fromElement "execute" doc
+      source <- forceGetAs TextArea.fromElement "source" doc
+      lexerOutput <- forceGetAs Output.fromElement "lexed" doc
+      parserOutput <- forceGetAs Output.fromElement "parsed" doc
+      assemblerOutput <- forceGetAs Output.fromElement "assembly" doc
+      compileButton <- forceGetAs Button.fromElement "compile" doc
+      backendSelector <- forceGetAs Div.fromElement "backend-selector" doc
+      watPrettyDiv <- forceGetAs Div.fromElement "wat-pretty" doc
+      watPrettyBox <- forceGetAs Input.fromElement "wat-pretty-box" doc
+      executeButton <- forceGetAs Button.fromElement "execute" doc
       pure $ PageElements
-        { pageSource
-        , pageLexerOutput
-        , pageParserOutput
-        , pageAssemblerOutput
-        , pageCompileButton
-        , pageBackendSelector
-        , pageWatPrettyDiv
-        , pageWatPrettyBox
-        , pageExecuteButton
+        { source
+        , lexerOutput
+        , parserOutput
+        , assemblerOutput
+        , compileButton
+        , backendSelector
+        , watPrettyDiv
+        , watPrettyBox
+        , executeButton
         }
 
 executeDisabledMessage :: String
 executeDisabledMessage = "Requires the 'WebAssembly' backend."
 
 loadFunc :: PageElements -> Effect EventListener
-loadFunc (PageElements { pageExecuteButton }) = eventListener $ \_ -> do
-  setTitle executeDisabledMessage (Button.toHTMLElement pageExecuteButton)
+loadFunc (PageElements { executeButton }) = eventListener $ \_ -> do
+  setTitle executeDisabledMessage (Button.toHTMLElement executeButton)
 
 toggleCollapse :: Partial => Window -> HTMLDocument -> Element -> Effect EventListener
 toggleCollapse win doc elt = eventListener \_ -> do
@@ -92,7 +94,7 @@ toggleCollapse win doc elt = eventListener \_ -> do
   contentStyle <- (style $ CSSInlineStyle.fromHTMLElement content)
   displayStyle <- CSSStyleDeclaration.getPropertyValue "display" contentStyle
     >>= \sty -> case sty of
-      "" -> getComputedStyle win elt
+      "" -> getComputedStyle win (Element.toElement content)
         >>= CSSStyleDeclaration.getPropertyValue "display"
       _ -> pure sty
   ( let
@@ -103,14 +105,14 @@ toggleCollapse win doc elt = eventListener \_ -> do
       CSSStyleDeclaration.setProperty "display" newStyle contentStyle
   )
 
-hookCollapsibles :: Partial => Window -> HTMLDocument -> Effect Unit
+hookCollapsibles :: Window -> HTMLDocument -> Effect Unit
 hookCollapsibles win htmlDoc =
   let
-    onClick = toggleCollapse win htmlDoc
+    onClick = unsafePartial toggleCollapse win htmlDoc
   in
     htmlDoc # toDocument # getElementsByClassName "collapsible"
       >>= toArray
-      >>= traverse_ \elem ->
+      >>= traverse_ \elem -> unsafePartial
         let
           target = Element.toEventTarget $ fromJust $ fromElement $ elem
         in
@@ -118,11 +120,24 @@ hookCollapsibles win htmlDoc =
             onClick' <- onClick elem
             addEventListener click onClick' false target
 
+compileFunc :: PageElements -> Effect EventListener
+compileFunc (PageElements { source, lexerOutput }) = eventListener \_ -> do
+  text <- TextArea.value source
+  ( let
+      tokens = lex text
+    in
+      do
+        result <- showTokens tokens
+        Output.setValue result lexerOutput
+  )
+
 main :: Effect Unit
-main = unsafePartial do
+main = do
   win <- window
   doc <- document win
-  pageElements <- getPageElements doc
-  onLoad <- loadFunc pageElements
+  pageElements@(PageElements { compileButton }) <- getPageElements doc
   hookCollapsibles win doc
+  onLoad <- loadFunc pageElements
   addEventListener load onLoad false (toEventTarget win)
+  onCompile <- compileFunc pageElements
+  addEventListener click onCompile false (Button.toEventTarget compileButton)
