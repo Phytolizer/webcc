@@ -4,11 +4,11 @@ module Main
 
 import Prelude
 
+import Data.Argonaut (encodeJson, stringifyWithIndent)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe, fromJust)
 import Data.Traversable (traverse_)
 import Effect (Effect)
-import JSON (showAST, showTokens)
 import Lexer (lex)
 import Parser (parse)
 import Partial.Unsafe (unsafePartial)
@@ -128,13 +128,13 @@ compileFunc (PageElements { source, lexerOutput, parserOutput }) = eventListener
   ( let
       tokens = lex text
       ast = parse tokens
+      lexerText = stringifyWithIndent 2 $ encodeJson tokens
+      parserText = case ast of
+        Left errMsg -> errMsg
+        Right program -> stringifyWithIndent 2 $ encodeJson program
     in
       do
-        result <- showTokens tokens
-        Output.setValue result lexerOutput
-        parserText <- case ast of
-          Left errMsg -> pure errMsg
-          Right program -> showAST program
+        Output.setValue lexerText lexerOutput
         Output.setValue parserText parserOutput
   )
 
