@@ -132,7 +132,9 @@ function parseBinaryExpression (
     const operator = tokens.shift() ?? { type: 'undefined', value: '' }
     const operand = parseBinaryExpression(tokens, unop.precedence)
     if (incDecOps.includes(operator.type) && operand.type !== 'varExpression') {
-      throw new ParseError(`cannot use operator '${operator.type}' on non-variable`)
+      throw new ParseError(
+        `cannot use operator '${operator.type}' on non-variable`
+      )
     }
     left = new ast.UnaryOp(operator.type, operand)
   } else {

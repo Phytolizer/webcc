@@ -120,18 +120,23 @@ class State {
     }
   }
 
-  generateIncDec = (operator: string, offset: number, postfix: boolean): string[] => {
+  generateIncDec = (
+    operator: string,
+    offset: number,
+    postfix: boolean
+  ): string[] => {
     switch (operator) {
       case '++': {
         return [
           sexp('i32.const', offset.toString()),
           sexp('i32.load'),
-          sexp('i32.const', '1'), sexp('i32.add'),
+          sexp('i32.const', '1'),
+          sexp('i32.add'),
           sexp('local.tee', '$dupme'),
           sexp('i32.const', offset.toString()),
           sexp('local.get', '$dupme'),
           sexp('i32.store'),
-          sexp('local.get', '$dupme'),
+          sexp('local.get', '$dupme')
         ]
       }
       default: {

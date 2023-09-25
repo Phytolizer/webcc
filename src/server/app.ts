@@ -13,9 +13,11 @@ import {
   isSourceCompileRequest,
   isTokensCompileRequest
 } from './types'
+import { type OverloadsReturnType } from './overload-types'
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function getApp (opts: any) {
+export function getApp (
+  opts: any
+): OverloadsReturnType<typeof Fastify, [typeof opts]> {
   const server = Fastify(opts)
 
   server.post('/', { schema: { body: schema } }, async (request, reply) => {
