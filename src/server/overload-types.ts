@@ -1,3 +1,4 @@
+// ref: https://stackoverflow.com/a/74098874
 type _Overloads<T> = T extends {
   (...args: infer A1): infer R1
   (...args: infer A2): infer R2
